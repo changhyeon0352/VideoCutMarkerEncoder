@@ -63,7 +63,7 @@ namespace VideoCutMarkerEncoder.Services
                 _watcher = new FileSystemWatcher(_settingsManager.Settings.ShareFolder)
                 {
                     NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
-                    Filter = "*.vcm", // VCM 메타데이터 파일만 감시
+                    Filter = "*.json", // VCM 메타데이터 파일만 감시
                     EnableRaisingEvents = false
                 };
 

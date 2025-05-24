@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VideoCutMarkerEncoder")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2a824faf787e17c704631e6ec6c654bd74f156fa")]
 [assembly: System.Reflection.AssemblyProductAttribute("VideoCutMarkerEncoder")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VideoCutMarkerEncoder")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

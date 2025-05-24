@@ -58,16 +58,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 3,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 4,
@@ -87,8 +79,8 @@
               "Title": "MainForm.cs",
               "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs",
               "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\MainForm.cs",
-              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs*",
-              "RelativeToolTip": "VideoCutMarkerEncoder\\MainForm.cs*",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\MainForm.cs",
               "ViewState": "AgIAAGABAAAAAAAAAAAgwHcBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-20T12:54:26.569Z",
@@ -113,8 +105,8 @@
               "Title": "MainForm.Designer.cs",
               "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.Designer.cs",
               "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\MainForm.Designer.cs",
-              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.Designer.cs*",
-              "RelativeToolTip": "VideoCutMarkerEncoder\\MainForm.Designer.cs*",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.Designer.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\MainForm.Designer.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-20T12:24:48.107Z",
@@ -139,8 +131,8 @@
               "Title": "MainForm.cs [\uB514\uC790\uC778]",
               "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs",
               "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\MainForm.cs",
-              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs [\uB514\uC790\uC778]*",
-              "RelativeToolTip": "VideoCutMarkerEncoder\\MainForm.cs [\uB514\uC790\uC778]*",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs [\uB514\uC790\uC778]",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\MainForm.cs [\uB514\uC790\uC778]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-19T13:01:53.017Z",
               "EditorCaption": " [\uB514\uC790\uC778]"
