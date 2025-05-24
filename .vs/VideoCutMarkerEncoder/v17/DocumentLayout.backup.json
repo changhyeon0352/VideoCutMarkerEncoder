@@ -1,0 +1,230 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\settingsform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\settingsform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\settingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\settingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\settingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\settingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\services\\videoprocessor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\services\\videoprocessor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\services\\smbservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\services\\smbservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\models\\appsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\models\\appsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\models\\settingsmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\models\\settingsmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|c:\\users\\dpdlf\\source\\repos\\videocutmarkerencoder\\videocutmarkerencoder\\models\\videoeditmetadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C569394C-B414-40F5-BFC3-3C397FE82253}|VideoCutMarkerEncoder\\VideoCutMarkerEncoder.csproj|solutionrelative:videocutmarkerencoder\\models\\videoeditmetadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "SettingsForm.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\SettingsForm.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\SettingsForm.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\SettingsForm.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\SettingsForm.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAlwAwAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:56:00.42Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainForm.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\MainForm.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs*",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\MainForm.cs*",
+              "ViewState": "AgIAAGABAAAAAAAAAAAgwHcBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:54:26.569Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Program.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\Program.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Program.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:46:24.592Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainForm.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.Designer.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\MainForm.Designer.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.Designer.cs*",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\MainForm.Designer.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:24:48.107Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "SettingsForm.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\SettingsForm.Designer.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\SettingsForm.Designer.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\SettingsForm.Designer.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\SettingsForm.Designer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAgAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:27:34.907Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainForm.cs [\uB514\uC790\uC778]",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\MainForm.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\MainForm.cs [\uB514\uC790\uC778]*",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\MainForm.cs [\uB514\uC790\uC778]*",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-19T13:01:53.017Z",
+              "EditorCaption": " [\uB514\uC790\uC778]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "SettingsForm.cs [\uB514\uC790\uC778]",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\SettingsForm.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\SettingsForm.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\SettingsForm.cs [\uB514\uC790\uC778]",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\SettingsForm.cs [\uB514\uC790\uC778]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:16:41.38Z",
+              "EditorCaption": " [\uB514\uC790\uC778]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "VideoProcessor.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Services\\VideoProcessor.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\Services\\VideoProcessor.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Services\\VideoProcessor.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\Services\\VideoProcessor.cs",
+              "ViewState": "AgIAAKwAAAAAAAAAAAAswOAAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:18:07.72Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "SmbService.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Services\\SmbService.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\Services\\SmbService.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Services\\SmbService.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\Services\\SmbService.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAgwDgAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:17:38.641Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AppSettings.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Models\\AppSettings.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\Models\\AppSettings.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Models\\AppSettings.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\Models\\AppSettings.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:18:26.113Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "SettingsManager.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Models\\SettingsManager.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\Models\\SettingsManager.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Models\\SettingsManager.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\Models\\SettingsManager.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:18:45.127Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "VideoEditMetadata.cs",
+              "DocumentMoniker": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Models\\VideoEditMetadata.cs",
+              "RelativeDocumentMoniker": "VideoCutMarkerEncoder\\Models\\VideoEditMetadata.cs",
+              "ToolTip": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\Models\\VideoEditMetadata.cs",
+              "RelativeToolTip": "VideoCutMarkerEncoder\\Models\\VideoEditMetadata.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-20T12:19:04.57Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

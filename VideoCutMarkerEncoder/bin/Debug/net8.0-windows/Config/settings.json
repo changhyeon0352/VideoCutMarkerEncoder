@@ -1,0 +1,12 @@
+{
+  "ShareFolder": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\bin\\Debug\\net8.0-windows\\Share",
+  "OutputFolder": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\bin\\Debug\\net8.0-windows\\Output",
+  "FFmpegPath": "C:\\Users\\dpdlf\\source\\repos\\VideoCutMarkerEncoder\\VideoCutMarkerEncoder\\bin\\Debug\\net8.0-windows\\FFmpeg\\ffmpeg.exe",
+  "ShareName": "VideoCutMarker",
+  "MinimizeToTray": true,
+  "NotifyOnComplete": true,
+  "VideoCodec": "libx264",
+  "AudioCodec": "aac",
+  "VideoQuality": 23,
+  "EncodingSpeed": "medium"
+}
