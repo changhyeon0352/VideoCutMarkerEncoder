@@ -15,3 +15,4 @@ C:\Users\dpdlf\source\repos\VideoCutMarkerEncoder\VideoCutMarkerEncoder\obj\Debu
 C:\Users\dpdlf\source\repos\VideoCutMarkerEncoder\VideoCutMarkerEncoder\obj\Debug\net8.0-windows\VideoCutMarkerEncoder.pdb
 C:\Users\dpdlf\source\repos\VideoCutMarkerEncoder\VideoCutMarkerEncoder\obj\Debug\net8.0-windows\VideoCutMarkerEncoder.genruntimeconfig.cache
 C:\Users\dpdlf\source\repos\VideoCutMarkerEncoder\VideoCutMarkerEncoder\obj\Debug\net8.0-windows\ref\VideoCutMarkerEncoder.dll
+C:\Users\dpdlf\source\repos\VideoCutMarkerEncoder\VideoCutMarkerEncoder\obj\Debug\net8.0-windows\VideoCutMarkerEncoder.sourcelink.json

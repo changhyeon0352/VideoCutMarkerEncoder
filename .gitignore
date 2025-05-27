@@ -1,0 +1,31 @@
+# Visual Studio build outputs
+bin/
+obj/
+.vs/
+
+# Build files
+*.exe
+*.dll
+*.pdb
+*.cache
+*.suo
+
+# Visual Studio temporary files
+*.tmp
+*.user
+*.userosscache
+*.sln.docstates
+
+# File content index (Visual Studio)
+FileContentIndex/
+
+# Package files
+*.nupkg
+*.snupkg
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+
+# Configuration files (if sensitive)
+Config/settings.json

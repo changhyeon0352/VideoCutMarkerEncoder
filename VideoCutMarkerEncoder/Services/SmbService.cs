@@ -21,6 +21,7 @@ namespace VideoCutMarkerEncoder.Services
     /// </summary>
     public class SmbService
     {
+        private readonly HashSet<string> _processedFiles = new HashSet<string>();
         private readonly SettingsManager _settingsManager;
         private FileSystemWatcher _watcher;
         private bool _isRunning;
@@ -66,7 +67,7 @@ namespace VideoCutMarkerEncoder.Services
                     Filter = "*.json", // VCM 메타데이터 파일만 감시
                     EnableRaisingEvents = false
                 };
-
+                _watcher.EnableRaisingEvents = true;
                 _watcher.Created += OnFileCreated;
                 _watcher.Changed += OnFileChanged;
             }
@@ -84,6 +85,7 @@ namespace VideoCutMarkerEncoder.Services
         {
             try
             {
+
                 // 공유 폴더 확인
                 if (!Directory.Exists(_settingsManager.Settings.ShareFolder))
                 {
@@ -279,8 +281,16 @@ namespace VideoCutMarkerEncoder.Services
         /// </summary>
         private void ProcessNewFile(string filePath)
         {
+            // 중복 처리 방지
+            if (_processedFiles.Contains(filePath))
+                return;
+
+            _processedFiles.Add(filePath);
+            // 1초 후 제거 (다음 변경 감지를 위해)
+            Task.Delay(2000).ContinueWith(_ => _processedFiles.Remove(filePath));
+
             // 파일 확장자 확인
-            if (Path.GetExtension(filePath).ToLower() == ".vcm")
+            if (Path.GetExtension(filePath).ToLower() == ".json")
             {
                 Debug.WriteLine($"새 메타데이터 파일 감지: {filePath}");
 

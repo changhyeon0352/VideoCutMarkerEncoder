@@ -441,8 +441,14 @@ namespace VideoCutMarkerEncoder.Services
 
                 process.Start();
 
-                // 비동기로 출력 읽기
+                // ★ 핵심: 출력 스트림을 계속 읽어줘야 함!
+                var outputTask = Task.Run(() => process.StandardOutput.ReadToEnd());
+                var errorTask = Task.Run(() => process.StandardError.ReadToEnd());
+
                 await process.WaitForExitAsync();
+
+                // 출력도 완료될 때까지 대기
+                await Task.WhenAll(outputTask, errorTask);
 
                 return process.ExitCode == 0;
             }
