@@ -270,6 +270,8 @@ namespace VideoCutMarkerEncoder.Services
                     OutputFilePath = outputPath,
                     Success = true
                 });
+
+                CleanupShareFiles(task);
             }
             catch (Exception ex)
             {
@@ -290,6 +292,34 @@ namespace VideoCutMarkerEncoder.Services
 
             // 다음 작업 처리
             ProcessNextTask();
+        }
+
+        private void CleanupShareFiles(ProcessingTask task)
+        {
+            try
+            {
+                // 메타데이터 파일 삭제
+                if (File.Exists(task.FilePath))
+                {
+                    File.Delete(task.FilePath);
+                }
+
+                // 비디오 파일도 Share 폴더에 있다면 삭제
+                string videoFileName = Path.GetFileName(task.Metadata.VideoPath);
+                string shareVideoPath = Path.Combine(_settingsManager.Settings.ShareFolder, videoFileName);
+
+                if (File.Exists(shareVideoPath))
+                {
+                    File.Delete(shareVideoPath);
+                }
+
+                Debug.WriteLine($"Share 폴더 정리 완료: {task.Metadata.VideoFileName}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Share 폴더 정리 오류: {ex.Message}");
+                // 정리 실패해도 메인 작업에는 영향 없음
+            }
         }
 
         /// <summary>
