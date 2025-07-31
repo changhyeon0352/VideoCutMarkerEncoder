@@ -273,7 +273,7 @@ namespace VideoCutMarkerEncoder.Services
         /// </summary>
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            ProcessNewFile(e.FullPath);
+            //ProcessNewFile(e.FullPath);
         }
 
         /// <summary>

@@ -5,7 +5,6 @@ using VideoCutMarkerEncoder.Models;
 
 namespace VideoCutMarkerEncoder
 {
-
     public partial class SettingsForm : Form
     {
         private readonly SettingsManager _settingsManager;
@@ -34,13 +33,6 @@ namespace VideoCutMarkerEncoder
             txtShareName.Text = _originalSettings.ShareName;
             chkMinimizeToTray.Checked = _originalSettings.MinimizeToTray;
             chkNotifyOnComplete.Checked = _originalSettings.NotifyOnComplete;
-
-            // 인코딩 설정
-            cboVideoCodec.SelectedItem = _originalSettings.VideoCodec;
-            cboAudioCodec.SelectedItem = _originalSettings.AudioCodec;
-            trkVideoQuality.Value = _originalSettings.VideoQuality;
-            lblQualityValue.Text = _originalSettings.VideoQuality.ToString();
-            cboEncodingSpeed.SelectedItem = _originalSettings.EncodingSpeed;
         }
 
         private void btnBrowseShareFolder_Click(object sender, EventArgs e)
@@ -92,11 +84,6 @@ namespace VideoCutMarkerEncoder
             }
         }
 
-        private void trkVideoQuality_Scroll(object sender, EventArgs e)
-        {
-            lblQualityValue.Text = trkVideoQuality.Value.ToString();
-        }
-
         private void btnOK_Click(object sender, EventArgs e)
         {
             try
@@ -118,10 +105,6 @@ namespace VideoCutMarkerEncoder
                 _settingsManager.Settings.ShareName = txtShareName.Text;
                 _settingsManager.Settings.MinimizeToTray = chkMinimizeToTray.Checked;
                 _settingsManager.Settings.NotifyOnComplete = chkNotifyOnComplete.Checked;
-                _settingsManager.Settings.VideoCodec = cboVideoCodec.SelectedItem.ToString();
-                _settingsManager.Settings.AudioCodec = cboAudioCodec.SelectedItem.ToString();
-                _settingsManager.Settings.VideoQuality = trkVideoQuality.Value;
-                _settingsManager.Settings.EncodingSpeed = cboEncodingSpeed.SelectedItem.ToString();
 
                 _settingsManager.SaveSettings();
 
@@ -160,18 +143,11 @@ namespace VideoCutMarkerEncoder
                 txtShareName.Text = "VideoCutMarker";
                 chkMinimizeToTray.Checked = true;
                 chkNotifyOnComplete.Checked = true;
-                cboVideoCodec.SelectedItem = "libx264";
-                cboAudioCodec.SelectedItem = "aac";
-                trkVideoQuality.Value = 23;
-                lblQualityValue.Text = "23";
-                cboEncodingSpeed.SelectedItem = "medium";
             }
         }
 
         private void InitializeComponent()
         {
-            this.tabControl = new System.Windows.Forms.TabControl();
-            this.tabGeneral = new System.Windows.Forms.TabPage();
             this.grpFolders = new System.Windows.Forms.GroupBox();
             this.btnBrowseOutputFolder = new System.Windows.Forms.Button();
             this.txtOutputFolder = new System.Windows.Forms.TextBox();
@@ -180,55 +156,17 @@ namespace VideoCutMarkerEncoder
             this.txtShareFolder = new System.Windows.Forms.TextBox();
             this.lblShareFolder = new System.Windows.Forms.Label();
             this.grpGeneral = new System.Windows.Forms.GroupBox();
+            this.btnFFmpegHelp = new System.Windows.Forms.Button();
             this.chkNotifyOnComplete = new System.Windows.Forms.CheckBox();
             this.chkMinimizeToTray = new System.Windows.Forms.CheckBox();
             this.txtShareName = new System.Windows.Forms.TextBox();
             this.lblShareName = new System.Windows.Forms.Label();
-            this.tabEncoding = new System.Windows.Forms.TabPage();
-            this.grpEncodingSettings = new System.Windows.Forms.GroupBox();
-            this.lblQualityValue = new System.Windows.Forms.Label();
-            this.lblQualityInfo = new System.Windows.Forms.Label();
-            this.trkVideoQuality = new System.Windows.Forms.TrackBar();
-            this.lblQuality = new System.Windows.Forms.Label();
-            this.cboEncodingSpeed = new System.Windows.Forms.ComboBox();
-            this.lblEncodingSpeed = new System.Windows.Forms.Label();
-            this.cboAudioCodec = new System.Windows.Forms.ComboBox();
-            this.lblAudioCodec = new System.Windows.Forms.Label();
-            this.cboVideoCodec = new System.Windows.Forms.ComboBox();
-            this.lblVideoCodec = new System.Windows.Forms.Label();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnResetDefault = new System.Windows.Forms.Button();
-            this.tabControl.SuspendLayout();
-            this.tabGeneral.SuspendLayout();
             this.grpFolders.SuspendLayout();
             this.grpGeneral.SuspendLayout();
-            this.tabEncoding.SuspendLayout();
-            this.grpEncodingSettings.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trkVideoQuality)).BeginInit();
             this.SuspendLayout();
-            // 
-            // tabControl
-            // 
-            this.tabControl.Controls.Add(this.tabGeneral);
-            this.tabControl.Controls.Add(this.tabEncoding);
-            this.tabControl.Location = new System.Drawing.Point(12, 12);
-            this.tabControl.Name = "tabControl";
-            this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(460, 315);
-            this.tabControl.TabIndex = 0;
-            // 
-            // tabGeneral
-            // 
-            this.tabGeneral.Controls.Add(this.grpFolders);
-            this.tabGeneral.Controls.Add(this.grpGeneral);
-            this.tabGeneral.Location = new System.Drawing.Point(4, 24);
-            this.tabGeneral.Name = "tabGeneral";
-            this.tabGeneral.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGeneral.Size = new System.Drawing.Size(452, 287);
-            this.tabGeneral.TabIndex = 0;
-            this.tabGeneral.Text = "일반 설정";
-            this.tabGeneral.UseVisualStyleBackColor = true;
             // 
             // grpFolders
             // 
@@ -238,16 +176,16 @@ namespace VideoCutMarkerEncoder
             this.grpFolders.Controls.Add(this.btnBrowseShareFolder);
             this.grpFolders.Controls.Add(this.txtShareFolder);
             this.grpFolders.Controls.Add(this.lblShareFolder);
-            this.grpFolders.Location = new System.Drawing.Point(17, 125);
+            this.grpFolders.Location = new System.Drawing.Point(12, 125);
             this.grpFolders.Name = "grpFolders";
-            this.grpFolders.Size = new System.Drawing.Size(418, 146);
+            this.grpFolders.Size = new System.Drawing.Size(460, 146);
             this.grpFolders.TabIndex = 1;
             this.grpFolders.TabStop = false;
             this.grpFolders.Text = "폴더 설정";
             // 
             // btnBrowseOutputFolder
             // 
-            this.btnBrowseOutputFolder.Location = new System.Drawing.Point(375, 103);
+            this.btnBrowseOutputFolder.Location = new System.Drawing.Point(415, 103);
             this.btnBrowseOutputFolder.Name = "btnBrowseOutputFolder";
             this.btnBrowseOutputFolder.Size = new System.Drawing.Size(37, 23);
             this.btnBrowseOutputFolder.TabIndex = 5;
@@ -259,7 +197,7 @@ namespace VideoCutMarkerEncoder
             // 
             this.txtOutputFolder.Location = new System.Drawing.Point(15, 103);
             this.txtOutputFolder.Name = "txtOutputFolder";
-            this.txtOutputFolder.Size = new System.Drawing.Size(354, 23);
+            this.txtOutputFolder.Size = new System.Drawing.Size(394, 23);
             this.txtOutputFolder.TabIndex = 4;
             // 
             // lblOutputFolder
@@ -273,7 +211,7 @@ namespace VideoCutMarkerEncoder
             // 
             // btnBrowseShareFolder
             // 
-            this.btnBrowseShareFolder.Location = new System.Drawing.Point(375, 47);
+            this.btnBrowseShareFolder.Location = new System.Drawing.Point(415, 47);
             this.btnBrowseShareFolder.Name = "btnBrowseShareFolder";
             this.btnBrowseShareFolder.Size = new System.Drawing.Size(37, 23);
             this.btnBrowseShareFolder.TabIndex = 2;
@@ -285,7 +223,7 @@ namespace VideoCutMarkerEncoder
             // 
             this.txtShareFolder.Location = new System.Drawing.Point(15, 47);
             this.txtShareFolder.Name = "txtShareFolder";
-            this.txtShareFolder.Size = new System.Drawing.Size(354, 23);
+            this.txtShareFolder.Size = new System.Drawing.Size(394, 23);
             this.txtShareFolder.TabIndex = 1;
             // 
             // lblShareFolder
@@ -299,16 +237,27 @@ namespace VideoCutMarkerEncoder
             // 
             // grpGeneral
             // 
+            this.grpGeneral.Controls.Add(this.btnFFmpegHelp);
             this.grpGeneral.Controls.Add(this.chkNotifyOnComplete);
             this.grpGeneral.Controls.Add(this.chkMinimizeToTray);
             this.grpGeneral.Controls.Add(this.txtShareName);
             this.grpGeneral.Controls.Add(this.lblShareName);
-            this.grpGeneral.Location = new System.Drawing.Point(17, 16);
+            this.grpGeneral.Location = new System.Drawing.Point(12, 12);
             this.grpGeneral.Name = "grpGeneral";
-            this.grpGeneral.Size = new System.Drawing.Size(418, 103);
+            this.grpGeneral.Size = new System.Drawing.Size(460, 107);
             this.grpGeneral.TabIndex = 0;
             this.grpGeneral.TabStop = false;
             this.grpGeneral.Text = "일반 설정";
+            // 
+            // btnFFmpegHelp
+            // 
+            this.btnFFmpegHelp.Location = new System.Drawing.Point(375, 29);
+            this.btnFFmpegHelp.Name = "btnFFmpegHelp";
+            this.btnFFmpegHelp.Size = new System.Drawing.Size(75, 23);
+            this.btnFFmpegHelp.TabIndex = 4;
+            this.btnFFmpegHelp.Text = "FFmpeg 도움말";
+            this.btnFFmpegHelp.UseVisualStyleBackColor = true;
+            this.btnFFmpegHelp.Click += new System.EventHandler(this.btnFFmpegHelp_Click);
             // 
             // chkNotifyOnComplete
             // 
@@ -346,175 +295,32 @@ namespace VideoCutMarkerEncoder
             this.lblShareName.TabIndex = 0;
             this.lblShareName.Text = "SMB 공유 이름:";
             // 
-            // tabEncoding
-            // 
-            this.tabEncoding.Controls.Add(this.grpEncodingSettings);
-            this.tabEncoding.Location = new System.Drawing.Point(4, 24);
-            this.tabEncoding.Name = "tabEncoding";
-            this.tabEncoding.Padding = new System.Windows.Forms.Padding(3);
-            this.tabEncoding.Size = new System.Drawing.Size(452, 287);
-            this.tabEncoding.TabIndex = 1;
-            this.tabEncoding.Text = "인코딩 설정";
-            this.tabEncoding.UseVisualStyleBackColor = true;
-            // 
-            // grpEncodingSettings
-            // 
-            this.grpEncodingSettings.Controls.Add(this.lblQualityValue);
-            this.grpEncodingSettings.Controls.Add(this.lblQualityInfo);
-            this.grpEncodingSettings.Controls.Add(this.trkVideoQuality);
-            this.grpEncodingSettings.Controls.Add(this.lblQuality);
-            this.grpEncodingSettings.Controls.Add(this.cboEncodingSpeed);
-            this.grpEncodingSettings.Controls.Add(this.lblEncodingSpeed);
-            this.grpEncodingSettings.Controls.Add(this.cboAudioCodec);
-            this.grpEncodingSettings.Controls.Add(this.lblAudioCodec);
-            this.grpEncodingSettings.Controls.Add(this.cboVideoCodec);
-            this.grpEncodingSettings.Controls.Add(this.lblVideoCodec);
-            this.grpEncodingSettings.Location = new System.Drawing.Point(17, 16);
-            this.grpEncodingSettings.Name = "grpEncodingSettings";
-            this.grpEncodingSettings.Size = new System.Drawing.Size(418, 255);
-            this.grpEncodingSettings.TabIndex = 0;
-            this.grpEncodingSettings.TabStop = false;
-            this.grpEncodingSettings.Text = "인코딩 설정";
-            // 
-            // lblQualityValue
-            // 
-            this.lblQualityValue.AutoSize = true;
-            this.lblQualityValue.Location = new System.Drawing.Point(340, 159);
-            this.lblQualityValue.Name = "lblQualityValue";
-            this.lblQualityValue.Size = new System.Drawing.Size(29, 15);
-            this.lblQualityValue.TabIndex = 9;
-            this.lblQualityValue.Text = "23";
-            // 
-            // lblQualityInfo
-            // 
-            this.lblQualityInfo.AutoSize = true;
-            this.lblQualityInfo.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblQualityInfo.Location = new System.Drawing.Point(155, 194);
-            this.lblQualityInfo.Name = "lblQualityInfo";
-            this.lblQualityInfo.Size = new System.Drawing.Size(223, 15);
-            this.lblQualityInfo.TabIndex = 8;
-            this.lblQualityInfo.Text = "낮을수록 고품질, 높을수록 저용량";
-            // 
-            // trkVideoQuality
-            // 
-            this.trkVideoQuality.Location = new System.Drawing.Point(155, 159);
-            this.trkVideoQuality.Maximum = 51;
-            this.trkVideoQuality.Minimum = 15;
-            this.trkVideoQuality.Name = "trkVideoQuality";
-            this.trkVideoQuality.Size = new System.Drawing.Size(179, 45);
-            this.trkVideoQuality.TabIndex = 7;
-            this.trkVideoQuality.TickFrequency = 2;
-            this.trkVideoQuality.Value = 23;
-            this.trkVideoQuality.Scroll += new System.EventHandler(this.trkVideoQuality_Scroll);
-            // 
-            // lblQuality
-            // 
-            this.lblQuality.AutoSize = true;
-            this.lblQuality.Location = new System.Drawing.Point(15, 159);
-            this.lblQuality.Name = "lblQuality";
-            this.lblQuality.Size = new System.Drawing.Size(80, 15);
-            this.lblQuality.TabIndex = 6;
-            this.lblQuality.Text = "품질 (CRF):";
-            // 
-            // cboEncodingSpeed
-            // 
-            this.cboEncodingSpeed.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboEncodingSpeed.FormattingEnabled = true;
-            this.cboEncodingSpeed.Items.AddRange(new object[] {
-            "ultrafast",
-            "superfast",
-            "veryfast",
-            "faster",
-            "fast",
-            "medium",
-            "slow",
-            "slower",
-            "veryslow"});
-            this.cboEncodingSpeed.Location = new System.Drawing.Point(155, 115);
-            this.cboEncodingSpeed.Name = "cboEncodingSpeed";
-            this.cboEncodingSpeed.Size = new System.Drawing.Size(214, 23);
-            this.cboEncodingSpeed.TabIndex = 5;
-            // 
-            // lblEncodingSpeed
-            // 
-            this.lblEncodingSpeed.AutoSize = true;
-            this.lblEncodingSpeed.Location = new System.Drawing.Point(15, 118);
-            this.lblEncodingSpeed.Name = "lblEncodingSpeed";
-            this.lblEncodingSpeed.Size = new System.Drawing.Size(94, 15);
-            this.lblEncodingSpeed.TabIndex = 4;
-            this.lblEncodingSpeed.Text = "인코딩 속도:";
-            // 
-            // cboAudioCodec
-            // 
-            this.cboAudioCodec.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboAudioCodec.FormattingEnabled = true;
-            this.cboAudioCodec.Items.AddRange(new object[] {
-            "aac",
-            "mp3",
-            "copy"});
-            this.cboAudioCodec.Location = new System.Drawing.Point(155, 74);
-            this.cboAudioCodec.Name = "cboAudioCodec";
-            this.cboAudioCodec.Size = new System.Drawing.Size(214, 23);
-            this.cboAudioCodec.TabIndex = 3;
-            // 
-            // lblAudioCodec
-            // 
-            this.lblAudioCodec.AutoSize = true;
-            this.lblAudioCodec.Location = new System.Drawing.Point(15, 77);
-            this.lblAudioCodec.Name = "lblAudioCodec";
-            this.lblAudioCodec.Size = new System.Drawing.Size(109, 15);
-            this.lblAudioCodec.TabIndex = 2;
-            this.lblAudioCodec.Text = "오디오 코덱:";
-            // 
-            // cboVideoCodec
-            // 
-            this.cboVideoCodec.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboVideoCodec.FormattingEnabled = true;
-            this.cboVideoCodec.Items.AddRange(new object[] {
-            "libx264",
-            "libx265",
-            "h264_nvenc",
-            "hevc_nvenc"});
-            this.cboVideoCodec.Location = new System.Drawing.Point(155, 32);
-            this.cboVideoCodec.Name = "cboVideoCodec";
-            this.cboVideoCodec.Size = new System.Drawing.Size(214, 23);
-            this.cboVideoCodec.TabIndex = 1;
-            // 
-            // lblVideoCodec
-            // 
-            this.lblVideoCodec.AutoSize = true;
-            this.lblVideoCodec.Location = new System.Drawing.Point(15, 35);
-            this.lblVideoCodec.Name = "lblVideoCodec";
-            this.lblVideoCodec.Size = new System.Drawing.Size(94, 15);
-            this.lblVideoCodec.TabIndex = 0;
-            this.lblVideoCodec.Text = "비디오 코덱:";
-            // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(235, 341);
+            this.btnOK.Location = new System.Drawing.Point(235, 285);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
-            this.btnOK.TabIndex = 1;
+            this.btnOK.TabIndex = 2;
             this.btnOK.Text = "확인";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(316, 341);
+            this.btnCancel.Location = new System.Drawing.Point(316, 285);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 2;
+            this.btnCancel.TabIndex = 3;
             this.btnCancel.Text = "취소";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // btnResetDefault
             // 
-            this.btnResetDefault.Location = new System.Drawing.Point(397, 341);
+            this.btnResetDefault.Location = new System.Drawing.Point(397, 285);
             this.btnResetDefault.Name = "btnResetDefault";
             this.btnResetDefault.Size = new System.Drawing.Size(75, 23);
-            this.btnResetDefault.TabIndex = 3;
+            this.btnResetDefault.TabIndex = 4;
             this.btnResetDefault.Text = "기본값";
             this.btnResetDefault.UseVisualStyleBackColor = true;
             this.btnResetDefault.Click += new System.EventHandler(this.btnResetDefault_Click);
@@ -523,11 +329,12 @@ namespace VideoCutMarkerEncoder
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 376);
+            this.ClientSize = new System.Drawing.Size(484, 320);
             this.Controls.Add(this.btnResetDefault);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
-            this.Controls.Add(this.tabControl);
+            this.Controls.Add(this.grpFolders);
+            this.Controls.Add(this.grpGeneral);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -535,26 +342,16 @@ namespace VideoCutMarkerEncoder
             this.Name = "SettingsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "설정";
-            this.tabControl.ResumeLayout(false);
-            this.tabGeneral.ResumeLayout(false);
             this.grpFolders.ResumeLayout(false);
             this.grpFolders.PerformLayout();
             this.grpGeneral.ResumeLayout(false);
             this.grpGeneral.PerformLayout();
-            this.tabEncoding.ResumeLayout(false);
-            this.grpEncodingSettings.ResumeLayout(false);
-            this.grpEncodingSettings.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trkVideoQuality)).EndInit();
             this.ResumeLayout(false);
-
         }
 
-        private System.Windows.Forms.TabControl tabControl;
-        private System.Windows.Forms.TabPage tabGeneral;
         private System.Windows.Forms.GroupBox grpGeneral;
         private System.Windows.Forms.Label lblShareName;
         private System.Windows.Forms.TextBox txtShareName;
-        private System.Windows.Forms.TabPage tabEncoding;
         private System.Windows.Forms.GroupBox grpFolders;
         private System.Windows.Forms.Button btnBrowseShareFolder;
         private System.Windows.Forms.TextBox txtShareFolder;
@@ -562,21 +359,11 @@ namespace VideoCutMarkerEncoder
         private System.Windows.Forms.Button btnBrowseOutputFolder;
         private System.Windows.Forms.TextBox txtOutputFolder;
         private System.Windows.Forms.Label lblOutputFolder;
-        private System.Windows.Forms.GroupBox grpEncodingSettings;
-        private System.Windows.Forms.Label lblVideoCodec;
-        private System.Windows.Forms.ComboBox cboVideoCodec;
-        private System.Windows.Forms.Label lblAudioCodec;
-        private System.Windows.Forms.ComboBox cboAudioCodec;
-        private System.Windows.Forms.Label lblQuality;
-        private System.Windows.Forms.ComboBox cboEncodingSpeed;
-        private System.Windows.Forms.Label lblEncodingSpeed;
-        private System.Windows.Forms.TrackBar trkVideoQuality;
-        private System.Windows.Forms.Label lblQualityInfo;
-        private System.Windows.Forms.Label lblQualityValue;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnResetDefault;
         private System.Windows.Forms.CheckBox chkMinimizeToTray;
         private System.Windows.Forms.CheckBox chkNotifyOnComplete;
+        private System.Windows.Forms.Button btnFFmpegHelp;
     }
 }

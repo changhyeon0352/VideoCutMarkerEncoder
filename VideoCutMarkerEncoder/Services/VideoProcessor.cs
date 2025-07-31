@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using VideoCutMarkerEncoder.Models;
 
 namespace VideoCutMarkerEncoder.Services
@@ -135,7 +138,7 @@ namespace VideoCutMarkerEncoder.Services
     }
 
     /// <summary>
-    /// 비디오 처리 서비스 - FFmpeg 통합
+    /// 비디오 처리 서비스 - FFmpeg 통합 (메타데이터 기반 인코딩)
     /// </summary>
     public class VideoProcessor
     {
@@ -323,16 +326,20 @@ namespace VideoCutMarkerEncoder.Services
         }
 
         /// <summary>
-        /// 비디오 처리 (FFmpeg 사용)
+        /// 비디오 처리 (FFmpeg 사용) - 메타데이터 인코딩 설정 우선 적용
         /// </summary>
         private async Task<string> ProcessVideoAsync(ProcessingTask task)
         {
             var metadata = task.Metadata;
 
-            // 출력 파일 경로 생성
+            // 출력 파일 경로 생성 (메타데이터 설정 우선)
             string baseFileName = Path.GetFileNameWithoutExtension(metadata.VideoFileName);
             baseFileName = System.Text.RegularExpressions.Regex.Replace(baseFileName, @"\[VCM_[a-zA-Z0-9]+\]", "");
-            string outputFileName = $"{baseFileName}_processed.mp4";
+
+            // 메타데이터의 파일명 설정 사용 (없으면 기본값)
+            string outputPrefix = !string.IsNullOrEmpty(metadata.EncodingSettings.OutputPrefix) ? metadata.EncodingSettings.OutputPrefix : "";
+            string outputSuffix = !string.IsNullOrEmpty(metadata.EncodingSettings.OutputSuffix) ? metadata.EncodingSettings.OutputSuffix : "";
+            string outputFileName = $"{outputPrefix}{baseFileName}{outputSuffix}.mp4";
             string outputPath = Path.Combine(_settingsManager.Settings.OutputFolder, outputFileName);
 
             // 세그먼트 처리
@@ -372,34 +379,8 @@ namespace VideoCutMarkerEncoder.Services
                 string segmentFilePath = Path.Combine(_settingsManager.Settings.OutputFolder, $"segment_{task.TaskId}_{i}.mp4");
                 segmentFiles.Add(segmentFilePath);
 
-                // FFmpeg 명령 생성
-                string ffmpegArgs = $"-y -i \"{metadata.VideoPath}\" -ss {startTime} -to {endTime} ";
-
-                // 회전 추가
-                string filterComplex = "";
-                switch (metadata.VideoRotation)
-                {
-                    case Rotation.CW90:
-                        filterComplex = "transpose=1,";
-                        break;
-                    case Rotation.CW180:
-                        filterComplex = "transpose=2,transpose=2,";
-                        break;
-                    case Rotation.CW270:
-                        filterComplex = "transpose=2,";
-                        break;
-                }
-
-                // 크롭 추가
-                filterComplex += $"crop={activeGroup.Width}:{activeGroup.Height}:{cropX}:{cropY}";
-
-                // 필터 적용
-                ffmpegArgs += $"-vf \"{filterComplex}\" ";
-
-                // 코덱 및 출력 설정
-                ffmpegArgs += $"-c:v {_settingsManager.Settings.VideoCodec} -preset {_settingsManager.Settings.EncodingSpeed} -crf {_settingsManager.Settings.VideoQuality} ";
-                ffmpegArgs += $"-c:a {_settingsManager.Settings.AudioCodec} ";
-                ffmpegArgs += $"\"{segmentFilePath}\"";
+                // FFmpeg 명령 생성 (메타데이터 설정 우선 사용)
+                string ffmpegArgs = BuildFFmpegCommand(metadata, startTime, endTime, cropX, cropY, activeGroup, segmentFilePath);
 
                 // FFmpeg 실행
                 UpdateProgress(task, (i * 100) / activeSegments.Count, $"세그먼트 {i + 1}/{activeSegments.Count} 인코딩 중");
@@ -454,6 +435,106 @@ namespace VideoCutMarkerEncoder.Services
 
             return outputPath;
         }
+
+        /// <summary>
+        /// FFmpeg 명령 생성 (메타데이터 인코딩 설정 우선 사용)
+        /// </summary>
+        private string BuildFFmpegCommand(VideoEditMetadata metadata, double startTime, double endTime,
+            int cropX, int cropY, GroupInfo activeGroup, string outputPath)
+        {
+            var args = new StringBuilder();
+
+            // 입력 파일
+            args.Append($"-y -i \"{metadata.VideoPath}\" -ss {startTime} -to {endTime} ");
+
+            // 비디오 필터 체인 구성
+            var filters = new List<string>();
+
+            // 1. 회전 필터
+            switch (metadata.VideoRotation)
+            {
+                case Rotation.CW90:
+                    filters.Add("transpose=1");
+                    break;
+                case Rotation.CW180:
+                    filters.Add("transpose=2,transpose=2");
+                    break;
+                case Rotation.CW270:
+                    filters.Add("transpose=2");
+                    break;
+            }
+
+            // 2. 크롭 필터
+            filters.Add($"crop={activeGroup.Width}:{activeGroup.Height}:{cropX}:{cropY}");
+
+            // 3. 스케일링 필터 (메타데이터에서)
+            if (metadata.EncodingSettings.EnableScaling && !string.IsNullOrEmpty(metadata.EncodingSettings.ScaleFilter))
+            {
+                filters.Add(metadata.EncodingSettings.ScaleFilter);
+                System.Diagnostics.Debug.WriteLine($"스케일링 필터 적용: {metadata.EncodingSettings.ScaleFilter}");
+            }
+
+            // 필터 체인 적용
+            if (filters.Count > 0)
+            {
+                args.Append($"-vf \"{string.Join(",", filters)}\" ");
+            }
+
+            // 비디오 코덱 (메타데이터 우선, 없으면 PC앱 설정)
+            string videoCodec = GetVideoCodec(metadata);
+            args.Append($"-c:v {videoCodec} ");
+
+            // 인코딩 속도 (PC앱 설정 사용)
+            args.Append($"-preset {_settingsManager.Settings.EncodingSpeed} ");
+
+            // CRF 값 (메타데이터 우선, 없으면 PC앱 설정)
+            int crf = metadata.EncodingSettings.CRF > 0 ? metadata.EncodingSettings.CRF : _settingsManager.Settings.VideoQuality;
+            args.Append($"-crf {crf} ");
+
+            // 오디오 코덱 (메타데이터 우선, 없으면 PC앱 설정)
+            string audioCodec = GetAudioCodec(metadata);
+            args.Append($"-c:a {audioCodec} ");
+
+            // 출력 파일
+            args.Append($"\"{outputPath}\"");
+
+            System.Diagnostics.Debug.WriteLine($"FFmpeg 명령: {args}");
+            return args.ToString();
+        }
+
+        /// 비디오 코덱 결정 (메타데이터 우선)
+        /// </summary>
+        private string GetVideoCodec(VideoEditMetadata metadata)
+        {
+            // 메타데이터에 코덱 설정이 있으면 사용
+            if (!string.IsNullOrEmpty(metadata.EncodingSettings.GetFFmpegVideoCodec()))
+            {
+                System.Diagnostics.Debug.WriteLine($"메타데이터 비디오 코덱 사용: {metadata.EncodingSettings.GetFFmpegVideoCodec()}");
+                return metadata.EncodingSettings.GetFFmpegVideoCodec();
+            }
+
+            // 없으면 PC앱 설정 사용
+            System.Diagnostics.Debug.WriteLine($"PC앱 비디오 코덱 사용: {_settingsManager.Settings.VideoCodec}");
+            return _settingsManager.Settings.VideoCodec;
+        }
+
+        /// <summary>
+        /// 오디오 코덱 결정 (메타데이터 우선)
+        /// </summary>
+        private string GetAudioCodec(VideoEditMetadata metadata)
+        {
+            // 메타데이터에 코덱 설정이 있으면 사용
+            if (!string.IsNullOrEmpty(metadata.EncodingSettings.GetFFmpegAudioCodec()))
+            {
+                System.Diagnostics.Debug.WriteLine($"메타데이터 오디오 코덱 사용: {metadata.EncodingSettings.GetFFmpegAudioCodec()}");
+                return metadata.EncodingSettings.GetFFmpegAudioCodec();
+            }
+
+            // 없으면 PC앱 설정 사용
+            System.Diagnostics.Debug.WriteLine($"PC앱 오디오 코덱 사용: {_settingsManager.Settings.AudioCodec}");
+            return _settingsManager.Settings.AudioCodec;
+        }
+
 
         /// <summary>
         /// FFmpeg 프로세스 실행

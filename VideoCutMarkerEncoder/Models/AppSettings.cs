@@ -3,7 +3,7 @@
 namespace VideoCutMarkerEncoder.Models
 {
     /// <summary>
-    /// 앱 설정 클래스
+    /// 앱 설정 클래스 (인코딩 설정 제거, 기본 설정만 유지)
     /// </summary>
     public class AppSettings
     {
@@ -16,12 +16,6 @@ namespace VideoCutMarkerEncoder.Models
         public string ShareName { get; set; }
         public bool MinimizeToTray { get; set; }
         public bool NotifyOnComplete { get; set; }
-
-        // 인코딩 설정
-        public string VideoCodec { get; set; }
-        public string AudioCodec { get; set; }
-        public int VideoQuality { get; set; }
-        public string EncodingSpeed { get; set; }
 
         /// <summary>
         /// 생성자 - 기본값 설정
@@ -37,12 +31,6 @@ namespace VideoCutMarkerEncoder.Models
             ShareName = "VideoCutMarker";
             MinimizeToTray = true;
             NotifyOnComplete = true;
-
-            // 인코딩 설정 기본값
-            VideoCodec = "libx264";
-            AudioCodec = "aac";
-            VideoQuality = 23; // CRF 값 (낮을수록 높은 품질)
-            EncodingSpeed = "medium";
         }
     }
 }
