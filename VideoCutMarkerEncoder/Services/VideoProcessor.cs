@@ -274,7 +274,16 @@ namespace VideoCutMarkerEncoder.Services
                     Success = true
                 });
 
-                CleanupShareFiles(task);
+                // ⭐ 설정에 따라 조건부 Share 폴더 정리
+                if (_settingsManager.Settings.AutoDeleteShareFiles)
+                {
+                    CleanupShareFiles(task);
+                    Debug.WriteLine("자동 삭제 설정이 활성화되어 Share 폴더 파일이 삭제되었습니다.");
+                }
+                else
+                {
+                   // Debug.WriteLine("자동 삭제 설정이 비활성화되어 Share 폴더 파일이 보존되었습니다.");
+                }
             }
             catch (Exception ex)
             {
@@ -449,8 +458,10 @@ namespace VideoCutMarkerEncoder.Services
 
             // 비디오 필터 체인 구성
             var filters = new List<string>();
+            // 1. 크롭 필터
+            filters.Add($"crop={activeGroup.Width}:{activeGroup.Height}:{cropX}:{cropY}");
 
-            // 1. 회전 필터
+            // 2. 회전 필터
             switch (metadata.VideoRotation)
             {
                 case Rotation.CW90:
@@ -463,9 +474,6 @@ namespace VideoCutMarkerEncoder.Services
                     filters.Add("transpose=2");
                     break;
             }
-
-            // 2. 크롭 필터
-            filters.Add($"crop={activeGroup.Width}:{activeGroup.Height}:{cropX}:{cropY}");
 
             // 3. 스케일링 필터 (메타데이터에서)
             if (metadata.EncodingSettings.EnableScaling && !string.IsNullOrEmpty(metadata.EncodingSettings.ScaleFilter))
@@ -487,9 +495,9 @@ namespace VideoCutMarkerEncoder.Services
             // 인코딩 속도 (PC앱 설정 사용)
             args.Append($"-preset {_settingsManager.Settings.EncodingSpeed} ");
 
-            // CRF 값 (메타데이터 우선, 없으면 PC앱 설정)
-            int crf = metadata.EncodingSettings.CRF > 0 ? metadata.EncodingSettings.CRF : _settingsManager.Settings.VideoQuality;
-            args.Append($"-crf {crf} ");
+            // CQ 값 (메타데이터 우선, 없으면 PC앱 설정)
+            int cq = metadata.EncodingSettings.CQ > 0 ? metadata.EncodingSettings.CQ : _settingsManager.Settings.VideoQuality;
+            args.Append($"-cq {cq} ");
 
             // 오디오 코덱 (메타데이터 우선, 없으면 PC앱 설정)
             string audioCodec = GetAudioCodec(metadata);

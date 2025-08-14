@@ -33,6 +33,9 @@ namespace VideoCutMarkerEncoder
             txtShareName.Text = _originalSettings.ShareName;
             chkMinimizeToTray.Checked = _originalSettings.MinimizeToTray;
             chkNotifyOnComplete.Checked = _originalSettings.NotifyOnComplete;
+
+            // ⭐ 자동 삭제 설정
+            chkAutoDeleteShareFiles.Checked = _originalSettings.AutoDeleteShareFiles;
         }
 
         private void btnBrowseShareFolder_Click(object sender, EventArgs e)
@@ -106,6 +109,9 @@ namespace VideoCutMarkerEncoder
                 _settingsManager.Settings.MinimizeToTray = chkMinimizeToTray.Checked;
                 _settingsManager.Settings.NotifyOnComplete = chkNotifyOnComplete.Checked;
 
+                // ⭐ 자동 삭제 설정 저장
+                _settingsManager.Settings.AutoDeleteShareFiles = chkAutoDeleteShareFiles.Checked;
+
                 _settingsManager.SaveSettings();
 
                 DialogResult = DialogResult.OK;
@@ -143,6 +149,9 @@ namespace VideoCutMarkerEncoder
                 txtShareName.Text = "VideoCutMarker";
                 chkMinimizeToTray.Checked = true;
                 chkNotifyOnComplete.Checked = true;
+
+                // ⭐ 자동 삭제도 기본값으로
+                chkAutoDeleteShareFiles.Checked = true;
             }
         }
 
@@ -157,6 +166,7 @@ namespace VideoCutMarkerEncoder
             this.lblShareFolder = new System.Windows.Forms.Label();
             this.grpGeneral = new System.Windows.Forms.GroupBox();
             this.btnFFmpegHelp = new System.Windows.Forms.Button();
+            this.chkAutoDeleteShareFiles = new System.Windows.Forms.CheckBox(); // ⭐ 새로 추가
             this.chkNotifyOnComplete = new System.Windows.Forms.CheckBox();
             this.chkMinimizeToTray = new System.Windows.Forms.CheckBox();
             this.txtShareName = new System.Windows.Forms.TextBox();
@@ -176,7 +186,7 @@ namespace VideoCutMarkerEncoder
             this.grpFolders.Controls.Add(this.btnBrowseShareFolder);
             this.grpFolders.Controls.Add(this.txtShareFolder);
             this.grpFolders.Controls.Add(this.lblShareFolder);
-            this.grpFolders.Location = new System.Drawing.Point(12, 125);
+            this.grpFolders.Location = new System.Drawing.Point(12, 150); // ⭐ 위치 조정 (높이 증가)
             this.grpFolders.Name = "grpFolders";
             this.grpFolders.Size = new System.Drawing.Size(460, 146);
             this.grpFolders.TabIndex = 1;
@@ -238,13 +248,14 @@ namespace VideoCutMarkerEncoder
             // grpGeneral
             // 
             this.grpGeneral.Controls.Add(this.btnFFmpegHelp);
+            this.grpGeneral.Controls.Add(this.chkAutoDeleteShareFiles); // ⭐ 새로 추가
             this.grpGeneral.Controls.Add(this.chkNotifyOnComplete);
             this.grpGeneral.Controls.Add(this.chkMinimizeToTray);
             this.grpGeneral.Controls.Add(this.txtShareName);
             this.grpGeneral.Controls.Add(this.lblShareName);
             this.grpGeneral.Location = new System.Drawing.Point(12, 12);
             this.grpGeneral.Name = "grpGeneral";
-            this.grpGeneral.Size = new System.Drawing.Size(460, 107);
+            this.grpGeneral.Size = new System.Drawing.Size(460, 132); // ⭐ 높이 증가
             this.grpGeneral.TabIndex = 0;
             this.grpGeneral.TabStop = false;
             this.grpGeneral.Text = "일반 설정";
@@ -258,6 +269,16 @@ namespace VideoCutMarkerEncoder
             this.btnFFmpegHelp.Text = "FFmpeg 도움말";
             this.btnFFmpegHelp.UseVisualStyleBackColor = true;
             this.btnFFmpegHelp.Click += new System.EventHandler(this.btnFFmpegHelp_Click);
+            // 
+            // chkAutoDeleteShareFiles ⭐ 새로 추가된 체크박스
+            // 
+            this.chkAutoDeleteShareFiles.AutoSize = true;
+            this.chkAutoDeleteShareFiles.Location = new System.Drawing.Point(15, 97);
+            this.chkAutoDeleteShareFiles.Name = "chkAutoDeleteShareFiles";
+            this.chkAutoDeleteShareFiles.Size = new System.Drawing.Size(250, 19);
+            this.chkAutoDeleteShareFiles.TabIndex = 5;
+            this.chkAutoDeleteShareFiles.Text = "인코딩 완료 후 Share 폴더 파일 자동 삭제";
+            this.chkAutoDeleteShareFiles.UseVisualStyleBackColor = true;
             // 
             // chkNotifyOnComplete
             // 
@@ -297,7 +318,7 @@ namespace VideoCutMarkerEncoder
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(235, 285);
+            this.btnOK.Location = new System.Drawing.Point(235, 310); // ⭐ 위치 조정
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 2;
@@ -307,7 +328,7 @@ namespace VideoCutMarkerEncoder
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(316, 285);
+            this.btnCancel.Location = new System.Drawing.Point(316, 310); // ⭐ 위치 조정
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 3;
@@ -317,7 +338,7 @@ namespace VideoCutMarkerEncoder
             // 
             // btnResetDefault
             // 
-            this.btnResetDefault.Location = new System.Drawing.Point(397, 285);
+            this.btnResetDefault.Location = new System.Drawing.Point(397, 310); // ⭐ 위치 조정
             this.btnResetDefault.Name = "btnResetDefault";
             this.btnResetDefault.Size = new System.Drawing.Size(75, 23);
             this.btnResetDefault.TabIndex = 4;
@@ -329,7 +350,7 @@ namespace VideoCutMarkerEncoder
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 320);
+            this.ClientSize = new System.Drawing.Size(484, 345); // ⭐ 폼 높이 증가
             this.Controls.Add(this.btnResetDefault);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
@@ -364,6 +385,7 @@ namespace VideoCutMarkerEncoder
         private System.Windows.Forms.Button btnResetDefault;
         private System.Windows.Forms.CheckBox chkMinimizeToTray;
         private System.Windows.Forms.CheckBox chkNotifyOnComplete;
+        private System.Windows.Forms.CheckBox chkAutoDeleteShareFiles; // ⭐ 새로 추가
         private System.Windows.Forms.Button btnFFmpegHelp;
     }
 }

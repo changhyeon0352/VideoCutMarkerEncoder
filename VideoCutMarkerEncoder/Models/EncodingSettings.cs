@@ -8,7 +8,7 @@ namespace VideoCutMarkerEncoder.Models
     public class EncodingSettings
     {
         public VideoCodec Codec { get; set; } = VideoCodec.H265_CPU;
-        public int CRF { get; set; } = 28;
+        public int CQ { get; set; } = 28;
         public AudioCodec AudioCodec { get; set; } = AudioCodec.AAC;
         public string OutputPrefix { get; set; } = "";
         public string OutputSuffix { get; set; } = "";

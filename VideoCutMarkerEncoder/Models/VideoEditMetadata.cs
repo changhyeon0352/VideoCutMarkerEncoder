@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace VideoCutMarkerEncoder.Models
 {
     /// <summary>
-    /// 비디오 편집 메타데이터 클래스 - 모바일 앱에서 생성한 .vcm 파일과 호환
+    /// 비디오 편집 메타데이터 클래스 - 단순화 (FFmpeg 직접 옵션)
     /// </summary>
     public class VideoEditMetadata
     {
@@ -21,6 +21,9 @@ namespace VideoCutMarkerEncoder.Models
         public Dictionary<int, GroupInfo> Groups { get; set; } = new Dictionary<int, GroupInfo>();
         public int ActiveGroupId { get; set; } = 1; // 현재 활성화된 그룹 ID
         public Dictionary<string, object> AdditionalProperties { get; set; } = new Dictionary<string, object>();
+
+        // FFmpeg 직접 옵션들
+        public EncodingSettings EncodingSettings { get; set; } = new EncodingSettings();
     }
 
     /// <summary>

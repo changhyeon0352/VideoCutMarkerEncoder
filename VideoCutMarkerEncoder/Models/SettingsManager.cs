@@ -7,7 +7,7 @@ using VideoCutMarkerEncoder.Models;
 namespace VideoCutMarkerEncoder.Models
 {
     /// <summary>
-    /// 앱 설정 저장 및 관리 클래스
+    /// 앱 설정 저장 및 관리 클래스 (인코딩 설정 제거)
     /// </summary>
     public class SettingsManager
     {
@@ -68,13 +68,7 @@ namespace VideoCutMarkerEncoder.Models
                         // 일반 설정
                         ShareName = "VideoCutMarker",
                         MinimizeToTray = true,
-                        NotifyOnComplete = true,
-
-                        // 인코딩 설정
-                        VideoCodec = "libx264",
-                        AudioCodec = "aac",
-                        VideoQuality = 23, // CRF 값 (낮을수록 높은 품질)
-                        EncodingSpeed = "medium"
+                        NotifyOnComplete = true
                     };
 
                     // 폴더 생성
