@@ -335,7 +335,7 @@ namespace VideoCutMarkerEncoder.Services
         }
 
         /// <summary>
-        /// 비디오 처리 (FFmpeg 사용) - 메타데이터 인코딩 설정 우선 적용
+        /// 비디오 처리 (FFmpeg 사용) - 모든 그룹별로 개별 파일 생성
         /// </summary>
         private async Task<string> ProcessVideoAsync(ProcessingTask task)
         {
@@ -348,101 +348,193 @@ namespace VideoCutMarkerEncoder.Services
             // 메타데이터의 파일명 설정 사용 (없으면 기본값)
             string outputPrefix = !string.IsNullOrEmpty(metadata.EncodingSettings.OutputPrefix) ? metadata.EncodingSettings.OutputPrefix : "";
             string outputSuffix = !string.IsNullOrEmpty(metadata.EncodingSettings.OutputSuffix) ? metadata.EncodingSettings.OutputSuffix : "";
-            string outputFileName = $"{outputPrefix}{baseFileName}{outputSuffix}.mp4";
-            string outputPath = Path.Combine(_settingsManager.Settings.OutputFolder, outputFileName);
 
-            // 세그먼트 처리
-            List<string> segmentFiles = new List<string>();
+            // id:0을 제외한 모든 그룹 가져오기
+            var activeGroups = metadata.Groups.Where(g => g.Key != 0).OrderBy(g => g.Key).ToList();
 
-            // 활성 그룹 정보 가져오기
-            if (!metadata.Groups.TryGetValue(metadata.ActiveGroupId, out GroupInfo activeGroup))
+            if (activeGroups.Count == 0)
             {
-                throw new Exception("활성 그룹을 찾을 수 없습니다.");
+                throw new Exception("처리할 그룹이 없습니다.");
             }
 
-            // 처리할 세그먼트 필터링 (활성 그룹만)
-            var activeSegments = metadata.Segments.FindAll(s => s.GroupId == metadata.ActiveGroupId);
-            if (activeSegments.Count == 0)
+            List<string> outputFiles = new List<string>();
+            int totalGroups = activeGroups.Count;
+            int currentGroupIndex = 0;
+
+            // 실제 세그먼트가 있는 그룹만 필터링
+            var groupsWithSegments = activeGroups.Where(g => metadata.Segments.Any(s => s.GroupId == g.Key)).ToList();
+            bool isMultipleGroups = groupsWithSegments.Count > 1;
+
+            // 각 그룹별로 처리
+            foreach (var groupPair in activeGroups)
             {
-                throw new Exception("처리할 세그먼트가 없습니다.");
-            }
+                int groupId = groupPair.Key;
+                GroupInfo groupInfo = groupPair.Value;
 
-            // 각 세그먼트별로 처리
-            for (int i = 0; i < activeSegments.Count; i++)
-            {
-                var segment = activeSegments[i];
+                // 해당 그룹의 세그먼트만 필터링
+                var groupSegments = metadata.Segments.Where(s => s.GroupId == groupId).OrderBy(s => s.StartTime).ToList();
 
-                // 시작/종료 시간 및 크롭 영역 계산
-                double startTime = segment.StartTime;
-                double endTime = segment.EndTime;
-
-                // 크롭 영역 계산
-                int cropX = segment.CenterX - (activeGroup.Width / 2);
-                int cropY = segment.CenterY - (activeGroup.Height / 2);
-
-                // 범위 조정 (음수 방지)
-                cropX = Math.Max(0, cropX);
-                cropY = Math.Max(0, cropY);
-
-                // 세그먼트 파일 경로
-                string segmentFilePath = Path.Combine(_settingsManager.Settings.OutputFolder, $"segment_{task.TaskId}_{i}.mp4");
-                segmentFiles.Add(segmentFilePath);
-
-                // FFmpeg 명령 생성 (메타데이터 설정 우선 사용)
-                string ffmpegArgs = BuildFFmpegCommand(metadata, startTime, endTime, cropX, cropY, activeGroup, segmentFilePath);
-
-                // FFmpeg 실행
-                UpdateProgress(task, (i * 100) / activeSegments.Count, $"세그먼트 {i + 1}/{activeSegments.Count} 인코딩 중");
-                bool success = await RunFFmpegProcessAsync(ffmpegArgs);
-
-                if (!success)
+                if (groupSegments.Count == 0)
                 {
-                    throw new Exception($"세그먼트 {i + 1} 처리 실패");
+                    // 세그먼트가 없는 그룹은 건너뛰기
+                    currentGroupIndex++;
+                    continue;
                 }
-            }
 
-            // 세그먼트가 여러 개면 병합
-            if (segmentFiles.Count > 1)
-            {
-                // 파일 목록 생성
-                string listFilePath = Path.Combine(_settingsManager.Settings.OutputFolder, $"segments_{task.TaskId}.txt");
-                using (StreamWriter writer = new StreamWriter(listFilePath))
+                // 그룹별 출력 파일명 생성 (그룹이 하나면 group 접미사 생략)
+                string outputFileName;
+                if (isMultipleGroups)
                 {
-                    foreach (string file in segmentFiles)
+                    outputFileName = $"{outputPrefix}{baseFileName}{outputSuffix}_group{groupId}.mp4";
+                }
+                else
+                {
+                    outputFileName = $"{outputPrefix}{baseFileName}{outputSuffix}.mp4";
+                }
+                string outputPath = Path.Combine(_settingsManager.Settings.OutputFolder, outputFileName);
+
+                // 그룹별 세그먼트 처리
+                List<string> segmentFiles = new List<string>();
+
+                // 각 세그먼트별로 처리
+                for (int i = 0; i < groupSegments.Count; i++)
+                {
+                    var segment = groupSegments[i];
+
+                    // 시작/종료 시간 및 크롭 영역 계산
+                    double startTime = segment.StartTime;
+                    double endTime = segment.EndTime;
+
+                    // 크롭 영역 계산
+                    int cropX = segment.CenterX - (groupInfo.Width / 2);
+                    int cropY = segment.CenterY - (groupInfo.Height / 2);
+
+                    // 범위 조정 (음수 방지)
+                    cropX = Math.Max(0, cropX);
+                    cropY = Math.Max(0, cropY);
+
+                    // 세그먼트 파일 경로
+                    string segmentFilePath = Path.Combine(_settingsManager.Settings.OutputFolder, $"segment_{task.TaskId}_group{groupId}_{i}.mp4");
+                    segmentFiles.Add(segmentFilePath);
+
+                    // FFmpeg 명령 생성
+                    string ffmpegArgs = BuildFFmpegCommand(metadata, startTime, endTime, cropX, cropY, groupInfo, segmentFilePath);
+
+                    // 진행률 계산 (전체 그룹 + 현재 그룹 내 세그먼트 진행률)
+                    int overallProgress = (currentGroupIndex * 100 / totalGroups) + ((i * 100 / totalGroups) / groupSegments.Count);
+
+                    // FFmpeg 실행
+                    UpdateProgress(task, overallProgress, $"그룹 {groupId} - 세그먼트 {i + 1}/{groupSegments.Count} 인코딩 중");
+                    bool success = await RunFFmpegProcessAsync(ffmpegArgs);
+
+                    if (!success)
                     {
-                        writer.WriteLine($"file '{file}'");
+                        throw new Exception($"그룹 {groupId} 세그먼트 {i + 1} 처리 실패");
                     }
                 }
 
-                // 병합 명령
-                string concatArgs = $"-y -f concat -safe 0 -i \"{listFilePath}\" -c copy \"{outputPath}\"";
-
-                // FFmpeg 실행
-                UpdateProgress(task, 90, "세그먼트 병합 중");
-                bool concatSuccess = await RunFFmpegProcessAsync(concatArgs);
-
-                if (!concatSuccess)
+                // 그룹 내 세그먼트가 여러 개면 병합
+                if (segmentFiles.Count > 1)
                 {
-                    throw new Exception("세그먼트 병합 실패");
+                    // 파일 목록 생성
+                    string listFilePath = Path.Combine(_settingsManager.Settings.OutputFolder, $"segments_group{groupId}_{task.TaskId}.txt");
+                    using (StreamWriter writer = new StreamWriter(listFilePath))
+                    {
+                        foreach (string file in segmentFiles)
+                        {
+                            writer.WriteLine($"file '{file}'");
+                        }
+                    }
+
+                    // 병합 명령
+                    string concatArgs = $"-y -f concat -safe 0 -i \"{listFilePath}\" -c copy \"{outputPath}\"";
+
+                    // FFmpeg 실행
+                    int mergeProgress = ((currentGroupIndex + 1) * 90 / totalGroups);
+                    UpdateProgress(task, mergeProgress, $"그룹 {groupId} 세그먼트 병합 중");
+                    bool concatSuccess = await RunFFmpegProcessAsync(concatArgs);
+
+                    if (!concatSuccess)
+                    {
+                        throw new Exception($"그룹 {groupId} 세그먼트 병합 실패");
+                    }
+
+                    // 임시 파일 삭제
+                    foreach (string file in segmentFiles)
+                    {
+                        File.Delete(file);
+                    }
+                    File.Delete(listFilePath);
+                }
+                else if (segmentFiles.Count == 1)
+                {
+                    // 세그먼트가 하나면 이름만 변경
+                    File.Move(segmentFiles[0], outputPath, true);
                 }
 
-                // 임시 파일 삭제
-                foreach (string file in segmentFiles)
-                {
-                    File.Delete(file);
-                }
-                File.Delete(listFilePath);
-            }
-            else if (segmentFiles.Count == 1)
-            {
-                // 세그먼트가 하나면 이름만 변경
-                File.Move(segmentFiles[0], outputPath, true);
+                outputFiles.Add(outputPath);
+                currentGroupIndex++;
             }
 
             // 진행 상황 업데이트
-            UpdateProgress(task, 100, "처리 완료");
+            UpdateProgress(task, 100, $"모든 그룹 처리 완료 ({outputFiles.Count}개 파일 생성)");
 
-            return outputPath;
+            // 첫 번째 파일 경로 반환 (기존 호환성 유지)
+            return outputFiles.FirstOrDefault() ?? "";
+        }
+
+        /// <summary>
+        /// 고유한 파일명 생성 (덮어쓰기 방지)
+        /// </summary>
+        private string GenerateUniqueFileName(string prefix, string baseName, string suffix, string extension)
+        {
+            try
+            {
+                string outputFolder = _settingsManager.Settings.OutputFolder;
+
+                // 기본 파일명 시도
+                string baseFileName = $"{prefix}{baseName}{suffix}{extension}";
+                string fullPath = Path.Combine(outputFolder, baseFileName);
+
+                if (!File.Exists(fullPath))
+                {
+                    return baseFileName; // 기본 이름 사용 가능
+                }
+
+                // 파일이 존재하면 번호를 추가해서 고유한 이름 생성
+                int counter = 1;
+                while (true)
+                {
+                    string numberedFileName = $"{prefix}{baseName}{suffix}({counter}){extension}";
+                    string numberedFullPath = Path.Combine(outputFolder, numberedFileName);
+
+                    if (!File.Exists(numberedFullPath))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"덮어쓰기 방지: {baseFileName} → {numberedFileName}");
+                        return numberedFileName;
+                    }
+
+                    counter++;
+
+                    // 무한 루프 방지 (최대 9999개)
+                    if (counter > 9999)
+                    {
+                        // 타임스탬프 추가로 최후 수단
+                        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                        string timestampFileName = $"{prefix}{baseName}{suffix}_{timestamp}{extension}";
+                        System.Diagnostics.Debug.WriteLine($"타임스탬프 파일명 사용: {timestampFileName}");
+                        return timestampFileName;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"고유 파일명 생성 오류: {ex.Message}");
+
+                // 오류 발생 시 타임스탬프 기반 파일명 반환
+                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                return $"{prefix}{baseName}{suffix}_{timestamp}{extension}";
+            }
         }
 
         /// <summary>
