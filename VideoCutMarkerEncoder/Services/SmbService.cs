@@ -102,6 +102,7 @@ namespace VideoCutMarkerEncoder.Services
                 // Windows 내장 SMB 공유 설정
                 SetupWindowsShare();
 
+
                 // 파일 감시 시작
                 _watcher.EnableRaisingEvents = true;
 
@@ -113,6 +114,40 @@ namespace VideoCutMarkerEncoder.Services
             {
                 Debug.WriteLine($"SMB 서비스 시작 오류: {ex.Message}");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// 서비스 시작 시 기존 파일들 확인 및 처리 (새로 추가)
+        /// </summary>
+        public void CheckExistingFilesOnStartup()
+        {
+            try
+            {
+                // JSON 파일들 검색
+                string[] jsonFiles = Directory.GetFiles(_settingsManager.Settings.ShareFolder, "*.json");
+
+                if (jsonFiles.Length > 0)
+                {
+                    // 사용자 확인
+                    string message = $"Share 폴더에 {jsonFiles.Length}개의 대기 중인 파일이 있습니다.\n지금 모든 파일을 인코딩하시겠습니까?";
+
+                    DialogResult result = MessageBox.Show(message, "대기 중인 파일 발견",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        // ⭐ 기존 ProcessNewFile() 메서드 재사용!
+                        foreach (string jsonFile in jsonFiles)
+                        {
+                            ProcessNewFile(jsonFile);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"기존 파일 확인 오류: {ex.Message}");
             }
         }
 

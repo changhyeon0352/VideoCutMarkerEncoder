@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -21,40 +21,48 @@ namespace VideoCutMarkerEncoder
 
         public MainForm()
         {
+
             InitializeComponent();
             InitializeServices();
             SetupTrayIcon();
-
-            // Ã¹ ½ÇÇà ¿©ºÎ È®ÀÎ ¹× ÃÊ±â ¼³Á¤ °¡ÀÌµå Ç¥½Ã
+            this.Shown += MainForm_Shown;
+            // ì²« ì‹¤í–‰ ì—¬ë¶€ í™•ì¸ ë° ì´ˆê¸° ì„¤ì • ê°€ì´ë“œ í‘œì‹œ
             if (settingsManager.IsFirstRun)
             {
                 ShowWelcomeGuide();
                 settingsManager.IsFirstRun = false;
                 settingsManager.SaveSettings();
             }
+            
+        }
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            // â­ ì°½ì´ ì™„ì „íˆ í‘œì‹œëœ í›„ ê¸°ì¡´ íŒŒì¼ ì²´í¬
+            smbService.CheckExistingFilesOnStartup();
         }
 
         private void InitializeServices()
         {
-            // ¼³Á¤ ¸Å´ÏÀú ÃÊ±âÈ­ (¾ÖÇÃ¸®ÄÉÀÌ¼Ç °æ·Î ±â¹İ)
+            // ì„¤ì • ë§¤ë‹ˆì € ì´ˆê¸°í™” (ì• í”Œë¦¬ì¼€ì´ì…˜ ê²½ë¡œ ê¸°ë°˜)
             settingsManager = new SettingsManager(Application.StartupPath);
 
-            // ºñµğ¿À ÇÁ·Î¼¼¼­ ÃÊ±âÈ­
+            // ë¹„ë””ì˜¤ í”„ë¡œì„¸ì„œ ì´ˆê¸°í™”
             videoProcessor = new VideoProcessor(settingsManager);
             videoProcessor.ProcessingProgress += OnProcessingProgress;
             videoProcessor.ProcessingCompleted += OnProcessingCompleted;
 
-            // SMB ¼­ºñ½º ÃÊ±âÈ­
+            // SMB ì„œë¹„ìŠ¤ ì´ˆê¸°í™”
             smbService = new SmbService(settingsManager);
             smbService.FileReceived += OnFileReceived;
+            
 
-            // UI ¾÷µ¥ÀÌÆ®
+            // UI ì—…ë°ì´íŠ¸
             UpdateServiceStatus();
         }
 
         private void SetupTrayIcon()
         {
-            // Æ®·¹ÀÌ ¾ÆÀÌÄÜ ¼³Á¤
+            // íŠ¸ë ˆì´ ì•„ì´ì½˜ ì„¤ì •
             trayIcon = new NotifyIcon
             {
                 Icon = this.Icon,
@@ -62,12 +70,12 @@ namespace VideoCutMarkerEncoder
                 Text = "VideoCutMarker"
             };
 
-            // ÄÁÅØ½ºÆ® ¸Ş´º ¼³Á¤
+            // ì»¨í…ìŠ¤íŠ¸ ë©”ë‰´ ì„¤ì •
             var contextMenu = new ContextMenuStrip();
-            contextMenu.Items.Add("¿­±â", null, (s, e) => { this.Show(); this.WindowState = FormWindowState.Normal; });
-            contextMenu.Items.Add("¼³Á¤", null, (s, e) => ShowSettings());
+            contextMenu.Items.Add("ì—´ê¸°", null, (s, e) => { this.Show(); this.WindowState = FormWindowState.Normal; });
+            contextMenu.Items.Add("ì„¤ì •", null, (s, e) => ShowSettings());
             contextMenu.Items.Add("-");
-            contextMenu.Items.Add("Á¾·á", null, (s, e) => Application.Exit());
+            contextMenu.Items.Add("ì¢…ë£Œ", null, (s, e) => Application.Exit());
 
             trayIcon.ContextMenuStrip = contextMenu;
             trayIcon.DoubleClick += (s, e) => { this.Show(); this.WindowState = FormWindowState.Normal; };
@@ -76,13 +84,13 @@ namespace VideoCutMarkerEncoder
         private void ShowWelcomeGuide()
         {
             MessageBox.Show(
-                "VideoCutMarker PC ¾Û¿¡ ¿À½Å °ÍÀ» È¯¿µÇÕ´Ï´Ù!\n\n" +
-                "ÀÌ ¾ÛÀº ¸ğ¹ÙÀÏ VideoCutMarker¿¡¼­ ÆíÁıÇÑ ºñµğ¿À¸¦ ÀÚµ¿À¸·Î Ã³¸®ÇÕ´Ï´Ù.\n\n" +
-                "1. ¿À¸¥ÂÊ »ó´ÜÀÇ '½ÃÀÛ' ¹öÆ°À» Å¬¸¯ÇÏ¿© ¼­ºñ½º¸¦ ½ÃÀÛÇÏ¼¼¿ä.\n" +
-                "2. ¸ğ¹ÙÀÏ ¾Û¿¡¼­ PC ¾ÛÀ¸·Î ÆÄÀÏÀ» Àü¼ÛÇÒ ¼ö ÀÖ½À´Ï´Ù.\n" +
-                "3. ÀÎÄÚµùÀÌ ÀÚµ¿À¸·Î ÁøÇàµÇ°í »óÅÂ¸¦ È®ÀÎÇÒ ¼ö ÀÖ½À´Ï´Ù.\n\n" +
-                "¼³Á¤ ¸Ş´º¿¡¼­ ´õ ¸¹Àº ¿É¼ÇÀ» È®ÀÎÇÏ¼¼¿ä.",
-                "VideoCutMarker ½ÃÀÛÇÏ±â",
+                "VideoCutMarker PC ì•±ì— ì˜¤ì‹  ê²ƒì„ í™˜ì˜í•©ë‹ˆë‹¤!\n\n" +
+                "ì´ ì•±ì€ ëª¨ë°”ì¼ VideoCutMarkerì—ì„œ í¸ì§‘í•œ ë¹„ë””ì˜¤ë¥¼ ìë™ìœ¼ë¡œ ì²˜ë¦¬í•©ë‹ˆë‹¤.\n\n" +
+                "1. ì˜¤ë¥¸ìª½ ìƒë‹¨ì˜ 'ì‹œì‘' ë²„íŠ¼ì„ í´ë¦­í•˜ì—¬ ì„œë¹„ìŠ¤ë¥¼ ì‹œì‘í•˜ì„¸ìš”.\n" +
+                "2. ëª¨ë°”ì¼ ì•±ì—ì„œ PC ì•±ìœ¼ë¡œ íŒŒì¼ì„ ì „ì†¡í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.\n" +
+                "3. ì¸ì½”ë”©ì´ ìë™ìœ¼ë¡œ ì§„í–‰ë˜ê³  ìƒíƒœë¥¼ í™•ì¸í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.\n\n" +
+                "ì„¤ì • ë©”ë‰´ì—ì„œ ë” ë§ì€ ì˜µì…˜ì„ í™•ì¸í•˜ì„¸ìš”.",
+                "VideoCutMarker ì‹œì‘í•˜ê¸°",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information
             );
@@ -92,22 +100,22 @@ namespace VideoCutMarkerEncoder
         {
             bool isRunning = smbService.IsRunning;
 
-            // »óÅÂ Ç¥½Ã
-            lblStatus.Text = isRunning ? "½ÇÇà Áß" : "ÁßÁöµÊ";
+            // ìƒíƒœ í‘œì‹œ
+            lblStatus.Text = isRunning ? "ì‹¤í–‰ ì¤‘" : "ì¤‘ì§€ë¨";
             lblStatus.ForeColor = isRunning ? Color.Green : Color.Red;
 
-            // ¹öÆ° ÅØ½ºÆ® º¯°æ
-            btnToggleService.Text = isRunning ? "ÁßÁö" : "½ÃÀÛ";
+            // ë²„íŠ¼ í…ìŠ¤íŠ¸ ë³€ê²½
+            btnToggleService.Text = isRunning ? "ì¤‘ì§€" : "ì‹œì‘";
 
-            // °øÀ¯ Á¤º¸ Ç¥½Ã
+            // ê³µìœ  ì •ë³´ í‘œì‹œ
             if (isRunning)
             {
-                txtShareInfo.Text = $"SMB °øÀ¯ ÁÖ¼Ò: \\\\{smbService.GetComputerName()}\\{settingsManager.Settings.ShareName}\r\n" +
-                                   $"Ãâ·Â Æú´õ: {settingsManager.Settings.OutputFolder}";
+                txtShareInfo.Text = $"SMB ê³µìœ  ì£¼ì†Œ: \\\\{smbService.GetComputerName()}\\{settingsManager.Settings.ShareName}\r\n" +
+                                   $"ì¶œë ¥ í´ë”: {settingsManager.Settings.OutputFolder}";
             }
             else
             {
-                txtShareInfo.Text = "¼­ºñ½º°¡ ÁßÁöµÇ¾ú½À´Ï´Ù. '½ÃÀÛ' ¹öÆ°À» ´­·¯ ¼­ºñ½º¸¦ ½ÃÀÛÇÏ¼¼¿ä.";
+                txtShareInfo.Text = "ì„œë¹„ìŠ¤ê°€ ì¤‘ì§€ë˜ì—ˆìŠµë‹ˆë‹¤. 'ì‹œì‘' ë²„íŠ¼ì„ ëˆŒëŸ¬ ì„œë¹„ìŠ¤ë¥¼ ì‹œì‘í•˜ì„¸ìš”.";
             }
         }
 
@@ -126,8 +134,8 @@ namespace VideoCutMarkerEncoder
                 catch (Exception ex)
                 {
                     MessageBox.Show(
-                        $"¼­ºñ½º¸¦ ½ÃÀÛÇÏ´Â Áß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù:\n\n{ex.Message}",
-                        "¿À·ù",
+                        $"ì„œë¹„ìŠ¤ë¥¼ ì‹œì‘í•˜ëŠ” ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤:\n\n{ex.Message}",
+                        "ì˜¤ë¥˜",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error
                     );
@@ -150,7 +158,7 @@ namespace VideoCutMarkerEncoder
 
                 if (result == DialogResult.OK)
                 {
-                    // ¼³Á¤ÀÌ º¯°æµÇ¾úÀ¸¸é ¼­ºñ½º Àç½ÃÀÛ
+                    // ì„¤ì •ì´ ë³€ê²½ë˜ì—ˆìœ¼ë©´ ì„œë¹„ìŠ¤ ì¬ì‹œì‘
                     if (smbService.IsRunning)
                     {
                         smbService.StopService();
@@ -164,39 +172,39 @@ namespace VideoCutMarkerEncoder
 
         private void OnFileReceived(object sender, FileReceivedEventArgs e)
         {
-            // UI ½º·¹µå¿¡¼­ ½ÇÇà
+            // UI ìŠ¤ë ˆë“œì—ì„œ ì‹¤í–‰
             this.Invoke(new Action(() =>
             {
                 try
                 {
-                    // ¸ŞÅ¸µ¥ÀÌÅÍ ÆÄÀÏ ÆÄ½Ì
+                    // ë©”íƒ€ë°ì´í„° íŒŒì¼ íŒŒì‹±
                     var metadata = MetadataParser.ParseMetadataFile(e.FilePath);
 
-                    // »õ ÀÛ¾÷ »ı¼º
+                    // ìƒˆ ì‘ì—… ìƒì„±
                     var task = new ProcessingTask
                     {
                         Metadata = metadata,
                         FilePath = e.FilePath,
-                        Status = "´ë±â Áß",
+                        Status = "ëŒ€ê¸° ì¤‘",
                         Progress = 0
                     };
 
-                    // ÀÛ¾÷ ¸ñ·Ï¿¡ Ãß°¡
+                    // ì‘ì—… ëª©ë¡ì— ì¶”ê°€
                     processingTasks.Add(task);
 
-                    // UI ¾÷µ¥ÀÌÆ®
+                    // UI ì—…ë°ì´íŠ¸
                     AddTaskToListView(task);
 
-                    // ÀÛ¾÷ Ã³¸® ½ÃÀÛ
+                    // ì‘ì—… ì²˜ë¦¬ ì‹œì‘
                     videoProcessor.EnqueueTask(task);
 
-                    // ¾Ë¸² Ç¥½Ã
+                    // ì•Œë¦¼ í‘œì‹œ
                     if (this.WindowState == FormWindowState.Minimized || !this.Visible)
                     {
                         trayIcon.ShowBalloonTip(
                             3000,
-                            "»õ ÆÄÀÏ ¼ö½Å",
-                            $"ÆÄÀÏ: {Path.GetFileName(e.FilePath)}\nÃ³¸®°¡ ½ÃÀÛµÇ¾ú½À´Ï´Ù.",
+                            "ìƒˆ íŒŒì¼ ìˆ˜ì‹ ",
+                            $"íŒŒì¼: {Path.GetFileName(e.FilePath)}\nì²˜ë¦¬ê°€ ì‹œì‘ë˜ì—ˆìŠµë‹ˆë‹¤.",
                             ToolTipIcon.Info
                         );
                     }
@@ -204,8 +212,8 @@ namespace VideoCutMarkerEncoder
                 catch (Exception ex)
                 {
                     MessageBox.Show(
-                        $"ÆÄÀÏ Ã³¸® Áß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù:\n\n{ex.Message}",
-                        "¿À·ù",
+                        $"íŒŒì¼ ì²˜ë¦¬ ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤:\n\n{ex.Message}",
+                        "ì˜¤ë¥˜",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error
                     );
@@ -225,18 +233,18 @@ namespace VideoCutMarkerEncoder
 
         private void OnProcessingProgress(object sender, ProcessingProgressEventArgs e)
         {
-            // UI ½º·¹µå¿¡¼­ ½ÇÇà
+            // UI ìŠ¤ë ˆë“œì—ì„œ ì‹¤í–‰
             this.Invoke(new Action(() =>
             {
-                // ÀÛ¾÷ Ã£±â
+                // ì‘ì—… ì°¾ê¸°
                 var task = processingTasks.Find(t => t.TaskId == e.TaskId);
                 if (task != null)
                 {
-                    // ÀÛ¾÷ »óÅÂ ¾÷µ¥ÀÌÆ®
+                    // ì‘ì—… ìƒíƒœ ì—…ë°ì´íŠ¸
                     task.Status = e.Status;
                     task.Progress = e.Progress;
 
-                    // UI ¾÷µ¥ÀÌÆ®
+                    // UI ì—…ë°ì´íŠ¸
                     UpdateTaskInListView(task);
                 }
             }));
@@ -244,30 +252,30 @@ namespace VideoCutMarkerEncoder
 
         private void OnProcessingCompleted(object sender, ProcessingCompletedEventArgs e)
         {
-            // UI ½º·¹µå¿¡¼­ ½ÇÇà
+            // UI ìŠ¤ë ˆë“œì—ì„œ ì‹¤í–‰
             this.Invoke(new Action(() =>
             {
-                // ÀÛ¾÷ Ã£±â
+                // ì‘ì—… ì°¾ê¸°
                 var task = processingTasks.Find(t => t.TaskId == e.TaskId);
                 if (task != null)
                 {
-                    // ÀÛ¾÷ »óÅÂ ¾÷µ¥ÀÌÆ®
-                    task.Status = e.Success ? "¿Ï·á" : "½ÇÆĞ";
+                    // ì‘ì—… ìƒíƒœ ì—…ë°ì´íŠ¸
+                    task.Status = e.Success ? "ì™„ë£Œ" : "ì‹¤íŒ¨";
                     task.Progress = e.Success ? 100 : 0;
                     task.OutputPath = e.OutputFilePath;
 
-                    // UI ¾÷µ¥ÀÌÆ®
+                    // UI ì—…ë°ì´íŠ¸
                     UpdateTaskInListView(task);
 
-                    // ¾Ë¸² Ç¥½Ã
+                    // ì•Œë¦¼ í‘œì‹œ
                     if (settingsManager.Settings.NotifyOnComplete &&
                         (this.WindowState == FormWindowState.Minimized || !this.Visible))
                     {
                         trayIcon.ShowBalloonTip(
                             3000,
-                            e.Success ? "Ã³¸® ¿Ï·á" : "Ã³¸® ½ÇÆĞ",
-                            $"ÆÄÀÏ: {Path.GetFileName(task.Metadata.VideoFileName)}\n" +
-                            $"{(e.Success ? "¼º°øÀûÀ¸·Î Ã³¸®µÇ¾ú½À´Ï´Ù." : "Ã³¸® Áß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù: " + e.ErrorMessage)}",
+                            e.Success ? "ì²˜ë¦¬ ì™„ë£Œ" : "ì²˜ë¦¬ ì‹¤íŒ¨",
+                            $"íŒŒì¼: {Path.GetFileName(task.Metadata.VideoFileName)}\n" +
+                            $"{(e.Success ? "ì„±ê³µì ìœ¼ë¡œ ì²˜ë¦¬ë˜ì—ˆìŠµë‹ˆë‹¤." : "ì²˜ë¦¬ ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤: " + e.ErrorMessage)}",
                             e.Success ? ToolTipIcon.Info : ToolTipIcon.Error
                         );
                     }
@@ -284,12 +292,12 @@ namespace VideoCutMarkerEncoder
                     item.SubItems[1].Text = task.Status;
                     item.SubItems[2].Text = $"{task.Progress}%";
 
-                    // »ö»ó ¼³Á¤
-                    if (task.Status == "¿Ï·á")
+                    // ìƒ‰ìƒ ì„¤ì •
+                    if (task.Status == "ì™„ë£Œ")
                     {
                         item.ForeColor = Color.Green;
                     }
-                    else if (task.Status == "½ÇÆĞ")
+                    else if (task.Status == "ì‹¤íŒ¨")
                     {
                         item.ForeColor = Color.Red;
                     }
@@ -308,14 +316,14 @@ namespace VideoCutMarkerEncoder
 
                 if (task != null && !string.IsNullOrEmpty(task.OutputPath) && File.Exists(task.OutputPath))
                 {
-                    // Ãâ·Â Æú´õ ¿­±â
+                    // ì¶œë ¥ í´ë” ì—´ê¸°
                     Process.Start("explorer.exe", $"/select,\"{task.OutputPath}\"");
                 }
                 else
                 {
                     MessageBox.Show(
-                        "Ãâ·Â ÆÄÀÏÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù.",
-                        "Á¤º¸",
+                        "ì¶œë ¥ íŒŒì¼ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.",
+                        "ì •ë³´",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information
                     );
@@ -332,8 +340,8 @@ namespace VideoCutMarkerEncoder
             else
             {
                 MessageBox.Show(
-                    "Ãâ·Â Æú´õ°¡ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.",
-                    "Á¤º¸",
+                    "ì¶œë ¥ í´ë”ê°€ ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.",
+                    "ì •ë³´",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );
@@ -350,7 +358,7 @@ namespace VideoCutMarkerEncoder
                 trayIcon.ShowBalloonTip(
                     2000,
                     "VideoCutMarker",
-                    "¾ÛÀÌ Æ®·¹ÀÌ·Î ÃÖ¼ÒÈ­µÇ¾ú½À´Ï´Ù. ´õºíÅ¬¸¯ÇÏ¿© ¿­ ¼ö ÀÖ½À´Ï´Ù.",
+                    "ì•±ì´ íŠ¸ë ˆì´ë¡œ ìµœì†Œí™”ë˜ì—ˆìŠµë‹ˆë‹¤. ë”ë¸”í´ë¦­í•˜ì—¬ ì—´ ìˆ˜ ìˆìŠµë‹ˆë‹¤.",
                     ToolTipIcon.Info
                 );
 
@@ -359,13 +367,13 @@ namespace VideoCutMarkerEncoder
 
             base.OnFormClosing(e);
 
-            // Á¾·á ½Ã ¼­ºñ½º ÁßÁö
+            // ì¢…ë£Œ ì‹œ ì„œë¹„ìŠ¤ ì¤‘ì§€
             if (smbService.IsRunning)
             {
                 smbService.StopService();
             }
 
-            // Æ®·¹ÀÌ ¾ÆÀÌÄÜ Á¦°Å
+            // íŠ¸ë ˆì´ ì•„ì´ì½˜ ì œê±°
             if (trayIcon != null)
             {
                 trayIcon.Visible = false;
