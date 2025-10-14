@@ -341,146 +341,485 @@ namespace VideoCutMarkerEncoder.Services
         {
             var metadata = task.Metadata;
 
-            // 출력 파일 경로 생성 (메타데이터 설정 우선)
-            string baseFileName = Path.GetFileNameWithoutExtension(metadata.VideoFileName);
-            baseFileName = System.Text.RegularExpressions.Regex.Replace(baseFileName, @"\[VCM_[a-zA-Z0-9]+\]", "");
-
-            // 메타데이터의 파일명 설정 사용 (없으면 기본값)
-            string outputPrefix = !string.IsNullOrEmpty(metadata.EncodingSettings.OutputPrefix) ? metadata.EncodingSettings.OutputPrefix : "";
-            string outputSuffix = !string.IsNullOrEmpty(metadata.EncodingSettings.OutputSuffix) ? metadata.EncodingSettings.OutputSuffix : "";
-
-            // id:0을 제외한 모든 그룹 가져오기
-            var activeGroups = metadata.Groups.Where(g => g.Key != 0).OrderBy(g => g.Key).ToList();
-
-            if (activeGroups.Count == 0)
+            try
             {
-                throw new Exception("처리할 그룹이 없습니다.");
-            }
-
-            List<string> outputFiles = new List<string>();
-            int totalGroups = activeGroups.Count;
-            int currentGroupIndex = 0;
-
-            // 실제 세그먼트가 있는 그룹만 필터링
-            var groupsWithSegments = activeGroups.Where(g => metadata.Segments.Any(s => s.GroupId == g.Key)).ToList();
-            bool isMultipleGroups = groupsWithSegments.Count > 1;
-
-            // 각 그룹별로 처리
-            foreach (var groupPair in activeGroups)
-            {
-                int groupId = groupPair.Key;
-                GroupInfo groupInfo = groupPair.Value;
-
-                // 해당 그룹의 세그먼트만 필터링
-                var groupSegments = metadata.Segments.Where(s => s.GroupId == groupId).OrderBy(s => s.StartTime).ToList();
-
-                if (groupSegments.Count == 0)
+                if (metadata.OutputMode == OutputMode.Merge)
                 {
-                    // 세그먼트가 없는 그룹은 건너뛰기
-                    currentGroupIndex++;
-                    continue;
-                }
-
-                // 그룹별 출력 파일명 생성 (그룹이 하나면 group 접미사 생략)
-                string outputFileName;
-                if (isMultipleGroups)
-                {
-                    outputFileName = $"{outputPrefix}{baseFileName}{outputSuffix}_group{groupId}.mp4";
+                    return await ProcessMergeMode(metadata, task);
                 }
                 else
                 {
-                    outputFileName = $"{outputPrefix}{baseFileName}{outputSuffix}.mp4";
+                    return await ProcessSeparateMode(metadata, task);
                 }
-                string outputPath = Path.Combine(_settingsManager.Settings.OutputFolder, outputFileName);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"비디오 처리 실패: {ex.Message}", ex);
+            }
+        }
 
-                // 그룹별 세그먼트 처리
-                List<string> segmentFiles = new List<string>();
+        /// <summary>
+        /// Separate 모드 처리 (기존 방식 + 회전 추가)
+        /// </summary>
+        private async Task<string> ProcessSeparateMode(VideoEditMetadata metadata, ProcessingTask task)
+        {
+            var outputFiles = new List<string>();
+            var groupSegments = metadata.Segments.GroupBy(s => s.GroupId).ToList();
+            int totalGroups = groupSegments.Count();
+            int currentGroupIndex = 0;
 
-                // 각 세그먼트별로 처리
-                for (int i = 0; i < groupSegments.Count; i++)
+            foreach (var groupData in groupSegments)
+            {
+                int groupId = groupData.Key;
+                if (groupId == 0) continue; // 미선택 그룹 건너뛰기
+
+                var segments = groupData.OrderBy(s => s.StartTime).ToList();
+                if (!metadata.Groups.TryGetValue(groupId, out GroupInfo groupInfo))
+                    continue;
+
+                var segmentFiles = new List<string>();
+
+                for (int i = 0; i < segments.Count; i++)
                 {
-                    var segment = groupSegments[i];
-
-                    // 시작/종료 시간 및 크롭 영역 계산
+                    var segment = segments[i];
                     double startTime = segment.StartTime;
                     double endTime = segment.EndTime;
 
                     // 크롭 영역 계산
                     int cropX = segment.CenterX - (groupInfo.Width / 2);
-                    int cropY = segment.CenterY - (groupInfo.Height / 2);
-
-                    // 범위 조정 (음수 방지)
+                    int cropY = (metadata.VideoHeight - segment.CenterY) - (groupInfo.Height / 2);
                     cropX = Math.Max(0, cropX);
                     cropY = Math.Max(0, cropY);
 
                     // 세그먼트 파일 경로
-                    string segmentFilePath = Path.Combine(_settingsManager.Settings.OutputFolder, $"segment_{task.TaskId}_group{groupId}_{i}.mp4");
+                    string segmentFilePath = Path.Combine(_settingsManager.Settings.OutputFolder,
+                        $"segment_{task.TaskId}_group{groupId}_{i}.mp4");
                     segmentFiles.Add(segmentFilePath);
 
-                    // FFmpeg 명령 생성
-                    string ffmpegArgs = BuildFFmpegCommand(metadata, startTime, endTime, cropX, cropY, groupInfo, segmentFilePath);
+                    // FFmpeg 명령 생성 (회전 포함)
+                    string ffmpegArgs = BuildFFmpegCommand(metadata, startTime, endTime,
+                        cropX, cropY, groupInfo, segmentFilePath);
 
-                    // 진행률 계산 (전체 그룹 + 현재 그룹 내 세그먼트 진행률)
-                    int overallProgress = (currentGroupIndex * 100 / totalGroups) + ((i * 100 / totalGroups) / groupSegments.Count);
+                    // 진행률 계산
+                    int overallProgress = (currentGroupIndex * 100 / totalGroups) +
+                        ((i * 100 / totalGroups) / segments.Count);
 
                     // FFmpeg 실행
-                    UpdateProgress(task, overallProgress, $"그룹 {groupId} - 세그먼트 {i + 1}/{groupSegments.Count} 인코딩 중");
+                    UpdateProgress(task, overallProgress,
+                        $"그룹 {groupId} - 세그먼트 {i + 1}/{segments.Count} 인코딩 중");
                     bool success = await RunFFmpegProcessAsync(ffmpegArgs);
 
                     if (!success)
-                    {
                         throw new Exception($"그룹 {groupId} 세그먼트 {i + 1} 처리 실패");
-                    }
                 }
 
-                // 그룹 내 세그먼트가 여러 개면 병합
-                if (segmentFiles.Count > 1)
-                {
-                    // 파일 목록 생성
-                    string listFilePath = Path.Combine(_settingsManager.Settings.OutputFolder, $"segments_group{groupId}_{task.TaskId}.txt");
-                    using (StreamWriter writer = new StreamWriter(listFilePath))
-                    {
-                        foreach (string file in segmentFiles)
-                        {
-                            writer.WriteLine($"file '{file}'");
-                        }
-                    }
+                // 그룹 파일명 생성
+                string baseName = Path.GetFileNameWithoutExtension(metadata.VideoFileName);
+                string extension = ".mp4";
+                string prefix = metadata.EncodingSettings?.OutputPrefix ?? "";
+                string groupSuffix = totalGroups > 1 ? $"_group{groupId}" : "";
+                string suffix = metadata.EncodingSettings?.OutputSuffix ?? "";
+                string finalsuffix = $"{suffix}{groupSuffix}";
+                string outputFileName = GenerateUniqueFileName(prefix, baseName, finalsuffix, extension);
+                string outputPath = Path.Combine(_settingsManager.Settings.OutputFolder, outputFileName);
 
-                    // 병합 명령
-                    string concatArgs = $"-y -f concat -safe 0 -i \"{listFilePath}\" -c copy \"{outputPath}\"";
-
-                    // FFmpeg 실행
-                    int mergeProgress = ((currentGroupIndex + 1) * 90 / totalGroups);
-                    UpdateProgress(task, mergeProgress, $"그룹 {groupId} 세그먼트 병합 중");
-                    bool concatSuccess = await RunFFmpegProcessAsync(concatArgs);
-
-                    if (!concatSuccess)
-                    {
-                        throw new Exception($"그룹 {groupId} 세그먼트 병합 실패");
-                    }
-
-                    // 임시 파일 삭제
-                    foreach (string file in segmentFiles)
-                    {
-                        File.Delete(file);
-                    }
-                    File.Delete(listFilePath);
-                }
-                else if (segmentFiles.Count == 1)
-                {
-                    // 세그먼트가 하나면 이름만 변경
-                    File.Move(segmentFiles[0], outputPath, true);
-                }
-
+                // 그룹 내 세그먼트 병합 (필요시)
+                await MergeSegmentsIfNeeded(segmentFiles, outputPath, task, groupId);
                 outputFiles.Add(outputPath);
                 currentGroupIndex++;
             }
 
-            // 진행 상황 업데이트
             UpdateProgress(task, 100, $"모든 그룹 처리 완료 ({outputFiles.Count}개 파일 생성)");
-
-            // 첫 번째 파일 경로 반환 (기존 호환성 유지)
             return outputFiles.FirstOrDefault() ?? "";
+        }
+
+        /// <summary>
+        /// Merge 모드 처리 - 시간순 정렬 + 기준 해상도 맞춤
+        /// </summary>
+        private async Task<string> ProcessMergeMode(VideoEditMetadata metadata, ProcessingTask task)
+        {
+            // 기준 해상도 확인
+            if (metadata.ReferenceResolution == null)
+                throw new Exception("Merge 모드에는 기준 해상도가 필요합니다.");
+
+            // 모든 세그먼트를 시간순으로 정렬
+            var allSegments = GetSegmentsSortedByTime(metadata);
+            if (allSegments.Count == 0)
+                throw new Exception("병합할 세그먼트가 없습니다.");
+
+            var tempSegmentFiles = new List<string>();
+
+            // 각 세그먼트 처리
+            for (int i = 0; i < allSegments.Count; i++)
+            {
+                var segment = allSegments[i];
+                if (!metadata.Groups.TryGetValue(segment.GroupId, out GroupInfo groupInfo))
+                    continue;
+
+                // 임시 세그먼트 파일 경로
+                string tempFilePath = Path.Combine(_settingsManager.Settings.OutputFolder,
+                    $"temp_merge_{task.TaskId}_{i}.mp4");
+                tempSegmentFiles.Add(tempFilePath);
+
+                // 크롭 영역 계산
+                int cropX = segment.CenterX - (groupInfo.Width / 2);
+                int cropY = (metadata.VideoHeight - segment.CenterY) - (groupInfo.Height / 2);
+                cropX = Math.Max(0, cropX);
+                cropY = Math.Max(0, cropY);
+
+                // Merge용 FFmpeg 명령 생성 (회전 + 스케일링 + 패딩)
+                string ffmpegArgs = BuildMergeFFmpegCommand(metadata, segment.StartTime, segment.EndTime,
+                    cropX, cropY, groupInfo, tempFilePath);
+
+                // 진행률 업데이트
+                int progress = (i * 80 / allSegments.Count); // 80%까지 개별 세그먼트 처리
+                UpdateProgress(task, progress, $"세그먼트 {i + 1}/{allSegments.Count} 처리 중");
+
+                // FFmpeg 실행
+                bool success = await RunFFmpegProcessAsync(ffmpegArgs);
+                if (!success)
+                    throw new Exception($"세그먼트 {i + 1} 처리 실패");
+            }
+
+            // 최종 병합
+            string finalOutputPath = await MergeFinalVideo(metadata, tempSegmentFiles, task);
+
+            // 임시 파일 정리
+            foreach (string tempFile in tempSegmentFiles)
+            {
+                try { File.Delete(tempFile); } catch { }
+            }
+
+            UpdateProgress(task, 100, "Merge 완료");
+            return finalOutputPath;
+        }
+
+        /// <summary>
+        /// 시간순으로 정렬된 세그먼트 목록 반환
+        /// </summary>
+        private List<CropSegmentInfo> GetSegmentsSortedByTime(VideoEditMetadata metadata)
+        {
+            return metadata.Segments
+                .Where(s => s.GroupId != 0) // 미선택 그룹 제외
+                .OrderBy(s => s.StartTime)
+                .ThenBy(s => s.EndTime)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Separate 모드용 FFmpeg 명령 생성 (회전 포함)
+        /// </summary>
+        private string BuildFFmpegCommand(VideoEditMetadata metadata, double startTime, double endTime,
+            int cropX, int cropY, GroupInfo groupInfo, string outputPath)
+        {
+            var args = new StringBuilder();
+            args.Append($"-y -ss {startTime} -i \"{metadata.VideoPath}\" -t {endTime - startTime} ");
+
+            // 비디오 필터 체인 구성
+            var filters = new List<string>();
+
+            // 1. 크롭 필터
+            filters.Add($"crop={groupInfo.Width}:{groupInfo.Height}:{cropX}:{cropY}");
+
+            // 2. 회전 필터 추가
+            string rotationFilter = GetRotationFilter(groupInfo.Rotation);
+            if (!string.IsNullOrEmpty(rotationFilter))
+            {
+                filters.Add(rotationFilter);
+            }
+            // 3. ✅ 스케일링 필터 (조건부 체크를 C#에서 미리 처리)
+            if (metadata.EncodingSettings.EnableScaling)
+            {
+                string optimizedScaleFilter = GetOptimizedScaleFilter(metadata);
+                if (!string.IsNullOrEmpty(optimizedScaleFilter))
+                {
+                    filters.Add(optimizedScaleFilter);
+                    System.Diagnostics.Debug.WriteLine($"최적화된 스케일링 필터: {optimizedScaleFilter}");
+                }
+            }
+            // 필터 체인 적용
+            if (filters.Count > 0)
+            {
+                args.Append($"-vf \"{string.Join(",", filters)}\" ");
+            }
+            
+            // 인코딩 설정
+            AppendEncodingSettings(args, metadata);
+            args.Append($"\"{outputPath}\"");
+
+            Debug.WriteLine($"Separate FFmpeg 명령: {args}");
+            return args.ToString();
+        }
+
+        /// <summary>
+        /// 조건부 스케일링을 미리 계산하여 고정값 필터로 변환
+        /// </summary>
+        private string GetOptimizedScaleFilter(VideoEditMetadata metadata)
+        {
+            string originalFilter = metadata.EncodingSettings.ScaleFilter;
+
+            if (string.IsNullOrEmpty(originalFilter))
+                return "";
+
+            try
+            {
+                // 높이 기준 조건부 스케일링 처리
+                if (originalFilter.Contains("if(gt(ih,") && originalFilter.Contains("),") && originalFilter.Contains(",ih)"))
+                {
+                    // scale=-1:'if(gt(ih,1300),1280,ih)' 패턴 파싱
+                    var match = System.Text.RegularExpressions.Regex.Match(
+                        originalFilter,
+                        @"scale=-1:'if\(gt\(ih,(\d+)\),(\d+),ih\)'"
+                    );
+
+                    if (match.Success)
+                    {
+                        int conditionHeight = int.Parse(match.Groups[1].Value);  // 1300
+                        int targetHeight = int.Parse(match.Groups[2].Value);     // 1280
+
+                        // ✅ 조건을 C#에서 미리 계산
+                        int videoHeight = metadata.VideoHeight; // 또는 다른 방법으로 가져오기
+                        int finalHeight = videoHeight > conditionHeight ? targetHeight : videoHeight;
+
+                        System.Diagnostics.Debug.WriteLine($"스케일링 최적화: {videoHeight}px > {conditionHeight}px ? {targetHeight}px : {videoHeight}px = {finalHeight}px");
+
+                        return $"scale=-1:{finalHeight}";
+                    }
+                }
+
+                // 너비 기준 조건부 스케일링 처리
+                if (originalFilter.Contains("if(gt(iw,") && originalFilter.Contains("),") && originalFilter.Contains(",iw)"))
+                {
+                    // scale='if(gt(iw,2560),1920,iw)':-1 패턴 파싱
+                    var match = System.Text.RegularExpressions.Regex.Match(
+                        originalFilter,
+                        @"scale='if\(gt\(iw,(\d+)\),(\d+),iw\)':-1"
+                    );
+
+                    if (match.Success)
+                    {
+                        int conditionWidth = int.Parse(match.Groups[1].Value);
+                        int targetWidth = int.Parse(match.Groups[2].Value);
+
+                        int videoWidth = metadata.VideoWidth;
+                        int finalWidth = videoWidth > conditionWidth ? targetWidth : videoWidth;
+
+                        return $"scale={finalWidth}:-1";
+                    }
+                }
+
+                // 조건부가 아닌 일반 스케일링은 그대로 반환
+                return originalFilter;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"스케일링 필터 최적화 오류: {ex.Message}");
+                return originalFilter; // 오류시 원본 사용
+            }
+        }
+
+        private string SwapScaleDimensions(string scaleFilter)
+        {
+            // "scale=1280:720" → "scale=720:1280"
+            if (scaleFilter.StartsWith("scale="))
+            {
+                var dimensions = scaleFilter.Substring(6).Split(':');
+                if (dimensions.Length == 2)
+                {
+                    return $"scale={dimensions[1]}:{dimensions[0]}";
+                }
+            }
+            return scaleFilter; // 파싱 실패 시 원본 반환
+        }
+
+        /// <summary>
+        /// Merge 모드용 FFmpeg 명령 생성 (회전 + 스케일링 + 패딩)
+        /// </summary>
+        private string BuildMergeFFmpegCommand(VideoEditMetadata metadata, double startTime, double endTime,
+            int cropX, int cropY, GroupInfo groupInfo, string outputPath)
+        {
+            var args = new StringBuilder();
+            args.Append($"-y -ss {startTime} -i \"{metadata.VideoPath}\" -t {endTime - startTime} ");
+
+            // 복합 필터 체인 구성
+            var filters = new List<string>();
+
+            // 1. 크롭
+            filters.Add($"crop={groupInfo.Width}:{groupInfo.Height}:{cropX}:{cropY}");
+
+            // 2. 회전 (회전 후 크기 변경 고려)
+            string rotationFilter = GetRotationFilter(groupInfo.Rotation);
+            if (!string.IsNullOrEmpty(rotationFilter))
+            {
+                filters.Add(rotationFilter);
+            }
+
+            // 3. 스케일링 + 패딩 (기준 해상도에 맞춤)
+            string scaleAndPadFilter = GetScaleAndPadFilter(groupInfo, metadata.ReferenceResolution);
+            if (!string.IsNullOrEmpty(scaleAndPadFilter))
+            {
+                filters.Add(scaleAndPadFilter);
+            }
+
+            // 필터 체인 적용
+            if (filters.Count > 0)
+            {
+                args.Append($"-vf \"{string.Join(",", filters)}\" ");
+            }
+
+            // 인코딩 설정
+            AppendEncodingSettings(args, metadata);
+            args.Append($"\"{outputPath}\"");
+
+            Debug.WriteLine($"Merge FFmpeg 명령: {args}");
+            return args.ToString();
+        }
+
+        /// <summary>
+        /// 회전 필터 문자열 생성
+        /// </summary>
+        private string GetRotationFilter(Rotation rotation)
+        {
+            return rotation switch
+            {
+                Rotation.CW90 => "transpose=1",      // 90도 시계방향
+                Rotation.CW180 => "transpose=2,transpose=2", // 180도 (90도 두번)
+                Rotation.CW270 => "transpose=2",     // 270도 시계방향 (90도 반시계방향)
+                _ => ""  // 회전 없음
+            };
+        }
+
+        /// <summary>
+        /// 스케일링 + 패딩 필터 생성 (비율 유지)
+        /// </summary>
+        private string GetScaleAndPadFilter(GroupInfo groupInfo, ReferenceResolution reference)
+        {
+            // 회전된 실제 크기 계산
+            var (actualWidth, actualHeight) = groupInfo.GetRotatedSize();
+
+            // 기준 해상도와 같으면 스케일링 불필요
+            if (actualWidth == reference.Width && actualHeight == reference.Height)
+                return "";
+
+            // 스케일링 비율 계산 (작은 쪽에 맞춤 - 비율 유지)
+            double scaleRatio = Math.Min(
+                (double)reference.Width / actualWidth,
+                (double)reference.Height / actualHeight
+            );
+
+            int scaledWidth = (int)(actualWidth * scaleRatio);
+            int scaledHeight = (int)(actualHeight * scaleRatio);
+
+            // 짝수로 맞춤 (인코딩 오류 방지)
+            scaledWidth = (scaledWidth / 2) * 2;
+            scaledHeight = (scaledHeight / 2) * 2;
+
+            // scale + pad 필터 조합
+            return $"scale={scaledWidth}:{scaledHeight}," +
+                   $"pad={reference.Width}:{reference.Height}:" +
+                   $"{(reference.Width - scaledWidth) / 2}:" +
+                   $"{(reference.Height - scaledHeight) / 2}:black";
+        }
+
+        /// <summary>
+        /// 세그먼트 병합 (필요시)
+        /// </summary>
+        private async Task MergeSegmentsIfNeeded(List<string> segmentFiles, string outputPath,
+            ProcessingTask task, int groupId)
+        {
+            if (segmentFiles.Count > 1)
+            {
+                // 파일 목록 생성
+                string listFilePath = Path.Combine(_settingsManager.Settings.OutputFolder,
+                    $"segments_group{groupId}_{task.TaskId}.txt");
+                using (StreamWriter writer = new StreamWriter(listFilePath))
+                {
+                    foreach (string file in segmentFiles)
+                        writer.WriteLine($"file '{file}'");
+                }
+
+                // 병합 명령
+                string concatArgs = $"-y -f concat -safe 0 -i \"{listFilePath}\" -c copy \"{outputPath}\"";
+
+                // FFmpeg 실행
+                bool success = await RunFFmpegProcessAsync(concatArgs);
+                if (!success)
+                    throw new Exception($"그룹 {groupId} 세그먼트 병합 실패");
+
+                // 임시 파일 삭제
+                foreach (string file in segmentFiles)
+                    try { File.Delete(file); } catch { }
+                try { File.Delete(listFilePath); } catch { }
+            }
+            else if (segmentFiles.Count == 1)
+            {
+                // 세그먼트가 하나면 이름만 변경
+                File.Move(segmentFiles[0], outputPath, true);
+            }
+        }
+
+        /// <summary>
+        /// 최종 비디오 병합 (Merge 모드)
+        /// </summary>
+        private async Task<string> MergeFinalVideo(VideoEditMetadata metadata,
+            List<string> tempFiles, ProcessingTask task)
+        {
+            // 최종 출력 파일 경로
+            string baseName = Path.GetFileNameWithoutExtension(metadata.VideoFileName);
+            string prefix = metadata.EncodingSettings?.OutputPrefix ?? "";
+            string suffix = metadata.EncodingSettings?.OutputSuffix ?? "";
+            string finalSuffix = $"{suffix}_merged";
+            string finalFileName = GenerateUniqueFileName(prefix, baseName, finalSuffix, ".mp4");
+            string finalPath = Path.Combine(_settingsManager.Settings.OutputFolder, finalFileName);
+
+            if (tempFiles.Count == 1)
+            {
+                // 파일이 하나면 이름만 변경
+                File.Move(tempFiles[0], finalPath, true);
+            }
+            else
+            {
+                // 여러 파일 병합
+                string listFilePath = Path.Combine(_settingsManager.Settings.OutputFolder,
+                    $"final_merge_{task.TaskId}.txt");
+
+                using (StreamWriter writer = new StreamWriter(listFilePath))
+                {
+                    foreach (string file in tempFiles)
+                        writer.WriteLine($"file '{file}'");
+                }
+
+                string concatArgs = $"-y -f concat -safe 0 -i \"{listFilePath}\" -c copy \"{finalPath}\"";
+
+                UpdateProgress(task, 90, "최종 병합 중...");
+                bool success = await RunFFmpegProcessAsync(concatArgs);
+
+                if (!success)
+                    throw new Exception("최종 병합 실패");
+
+                try { File.Delete(listFilePath); } catch { }
+            }
+
+            return finalPath;
+        }
+
+        /// <summary>
+        /// 인코딩 설정 추가
+        /// </summary>
+        private void AppendEncodingSettings(StringBuilder args, VideoEditMetadata metadata)
+        {
+            // 비디오 코덱
+            string videoCodec = GetVideoCodec(metadata);
+            args.Append($"-c:v {videoCodec} ");
+
+            // 품질 설정
+            int cq = metadata.EncodingSettings?.CQ > 0 ?
+                metadata.EncodingSettings.CQ : _settingsManager.Settings.VideoQuality;
+            args.Append($"-cq {cq} ");
+
+            // 오디오 코덱
+            string audioCodec = GetAudioCodec(metadata);
+            args.Append($"-c:a {audioCodec} ");
         }
 
         /// <summary>
@@ -540,67 +879,7 @@ namespace VideoCutMarkerEncoder.Services
         /// <summary>
         /// FFmpeg 명령 생성 (메타데이터 인코딩 설정 우선 사용)
         /// </summary>
-        private string BuildFFmpegCommand(VideoEditMetadata metadata, double startTime, double endTime,
-            int cropX, int cropY, GroupInfo activeGroup, string outputPath)
-        {
-            var args = new StringBuilder();
-
-            // 입력 파일
-            args.Append($"-y -i \"{metadata.VideoPath}\" -ss {startTime} -to {endTime} ");
-
-            // 비디오 필터 체인 구성
-            var filters = new List<string>();
-            // 1. 크롭 필터
-            filters.Add($"crop={activeGroup.Width}:{activeGroup.Height}:{cropX}:{cropY}");
-
-            // 2. 회전 필터
-            switch (metadata.VideoRotation)
-            {
-                case Rotation.CW90:
-                    filters.Add("transpose=1");
-                    break;
-                case Rotation.CW180:
-                    filters.Add("transpose=2,transpose=2");
-                    break;
-                case Rotation.CW270:
-                    filters.Add("transpose=2");
-                    break;
-            }
-
-            // 3. 스케일링 필터 (메타데이터에서)
-            if (metadata.EncodingSettings.EnableScaling && !string.IsNullOrEmpty(metadata.EncodingSettings.ScaleFilter))
-            {
-                filters.Add(metadata.EncodingSettings.ScaleFilter);
-                System.Diagnostics.Debug.WriteLine($"스케일링 필터 적용: {metadata.EncodingSettings.ScaleFilter}");
-            }
-
-            // 필터 체인 적용
-            if (filters.Count > 0)
-            {
-                args.Append($"-vf \"{string.Join(",", filters)}\" ");
-            }
-
-            // 비디오 코덱 (메타데이터 우선, 없으면 PC앱 설정)
-            string videoCodec = GetVideoCodec(metadata);
-            args.Append($"-c:v {videoCodec} ");
-
-            // 인코딩 속도 (PC앱 설정 사용)
-            args.Append($"-preset {_settingsManager.Settings.EncodingSpeed} ");
-
-            // CQ 값 (메타데이터 우선, 없으면 PC앱 설정)
-            int cq = metadata.EncodingSettings.CQ > 0 ? metadata.EncodingSettings.CQ : _settingsManager.Settings.VideoQuality;
-            args.Append($"-cq {cq} ");
-
-            // 오디오 코덱 (메타데이터 우선, 없으면 PC앱 설정)
-            string audioCodec = GetAudioCodec(metadata);
-            args.Append($"-c:a {audioCodec} ");
-
-            // 출력 파일
-            args.Append($"\"{outputPath}\"");
-
-            System.Diagnostics.Debug.WriteLine($"FFmpeg 명령: {args}");
-            return args.ToString();
-        }
+        
 
         /// 비디오 코덱 결정 (메타데이터 우선)
         /// </summary>
@@ -653,8 +932,8 @@ namespace VideoCutMarkerEncoder.Services
                 process.Start();
 
                 // ★ 핵심: 출력 스트림을 계속 읽어줘야 함!
-                var outputTask = Task.Run(() => process.StandardOutput.ReadToEnd());
-                var errorTask = Task.Run(() => process.StandardError.ReadToEnd());
+                var outputTask = process.StandardOutput.ReadToEndAsync();
+                var errorTask = process.StandardError.ReadToEndAsync();
 
                 await process.WaitForExitAsync();
 
@@ -681,5 +960,8 @@ namespace VideoCutMarkerEncoder.Services
                 Status = status
             });
         }
+
+
+
     }
 }

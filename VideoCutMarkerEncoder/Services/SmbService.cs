@@ -154,15 +154,18 @@ namespace VideoCutMarkerEncoder.Services
         /// <summary>
         /// 서비스 중지
         /// </summary>
-        public void StopService()
+        public void StopService(bool isStopShare = true)
         {
             try
             {
                 // 파일 감시 중지
                 _watcher.EnableRaisingEvents = false;
-
-                // Windows 내장 SMB 공유 해제
-                RemoveWindowsShare();
+                if(isStopShare)
+                {
+                    // Windows 내장 SMB 공유 해제
+                    RemoveWindowsShare();
+                }
+                
 
                 _isRunning = false;
 
@@ -345,6 +348,39 @@ namespace VideoCutMarkerEncoder.Services
                 {
                     Debug.WriteLine($"파일 처리 오류: {ex.Message}");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Windows 공유가 활성화되어 있는지 확인 (앱 외부에서 설정한 경우도 포함)
+        /// </summary>
+        public bool IsShareActive()
+        {
+            try
+            {
+                // net share 명령으로 현재 공유 목록 조회
+                using (Process process = new Process())
+                {
+                    process.StartInfo.FileName = "net";
+                    process.StartInfo.Arguments = "share";
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.CreateNoWindow = true;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.StartInfo.RedirectStandardError = true;
+
+                    process.Start();
+                    string output = process.StandardOutput.ReadToEnd();
+                    process.WaitForExit();
+
+                    // 출력에서 설정된 ShareName이 있는지 확인
+                    // net share 출력 형식: "ShareName   C:\path   Remark"
+                    return output.Contains(_settingsManager.Settings.ShareName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"공유 상태 확인 오류: {ex.Message}");
+                return false;
             }
         }
     }

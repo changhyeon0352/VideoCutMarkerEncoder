@@ -25,6 +25,8 @@ namespace VideoCutMarkerEncoder
             InitializeComponent();
             InitializeServices();
             SetupTrayIcon();
+            // ⭐ 폼 활성화 시 상태 갱신
+            this.Activated += (s, e) => UpdateServiceStatus();
             this.Shown += MainForm_Shown;
             // 첫 실행 여부 확인 및 초기 설정 가이드 표시
             if (settingsManager.IsFirstRun)
@@ -98,25 +100,38 @@ namespace VideoCutMarkerEncoder
 
         private void UpdateServiceStatus()
         {
+            // ⭐ 앱 내부 실행 여부 + 외부 공유 설정 여부 모두 체크
             bool isRunning = smbService.IsRunning;
+            bool isShareActive = smbService.IsShareActive();
+            bool isActuallyShared = isRunning || isShareActive;
 
             // 상태 표시
-            lblStatus.Text = isRunning ? "실행 중" : "중지됨";
-            lblStatus.ForeColor = isRunning ? Color.Green : Color.Red;
-
-            // 버튼 텍스트 변경
-            btnToggleService.Text = isRunning ? "중지" : "시작";
-
-            // 공유 정보 표시
-            if (isRunning)
+            if (isActuallyShared)
             {
+                lblStatus.Text = "공유됨";
+                lblStatus.ForeColor = Color.Green;
+
+                // 공유 정보 표시
                 txtShareInfo.Text = $"SMB 공유 주소: \\\\{smbService.GetComputerName()}\\{settingsManager.Settings.ShareName}\r\n" +
                                    $"출력 폴더: {settingsManager.Settings.OutputFolder}";
+
+                // 외부에서 공유된 경우 추가 안내
+                if (!isRunning && isShareActive)
+                {
+                    txtShareInfo.Text += "\r\n\r\n 공유가 설정되어 있습니다.";
+                }
+                btnToggleService.Text = "StopShare";
             }
             else
             {
-                txtShareInfo.Text = "서비스가 중지되었습니다. '시작' 버튼을 눌러 서비스를 시작하세요.";
+                lblStatus.Text = "중지됨";
+                lblStatus.ForeColor = Color.Red;
+                txtShareInfo.Text = "서비스가 중지되었습니다. 'StartShare' 버튼을 눌러 서비스를 시작하세요.";
+                btnToggleService.Text = "StartShare";
             }
+
+            // 버튼 텍스트는 앱 내부 실행 상태 기준으로 설정
+            //btnToggleService.Text = isRunning ? "중지" : "시작";
         }
 
         private void btnToggleService_Click(object sender, EventArgs e)
@@ -370,7 +385,7 @@ namespace VideoCutMarkerEncoder
             // 종료 시 서비스 중지
             if (smbService.IsRunning)
             {
-                smbService.StopService();
+                smbService.StopService(false);
             }
 
             // 트레이 아이콘 제거
