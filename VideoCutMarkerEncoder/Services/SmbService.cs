@@ -99,8 +99,6 @@ namespace VideoCutMarkerEncoder.Services
                     InitializeWatcher();
                 }
 
-                // Windows 내장 SMB 공유 설정
-                SetupWindowsShare();
 
 
                 // 파일 감시 시작
@@ -160,11 +158,6 @@ namespace VideoCutMarkerEncoder.Services
             {
                 // 파일 감시 중지
                 _watcher.EnableRaisingEvents = false;
-                if(isStopShare)
-                {
-                    // Windows 내장 SMB 공유 해제
-                    RemoveWindowsShare();
-                }
                 
 
                 _isRunning = false;
@@ -214,89 +207,7 @@ namespace VideoCutMarkerEncoder.Services
             }
         }
 
-        /// <summary>
-        /// Windows 공유 설정
-        /// </summary>
-        private void SetupWindowsShare()
-        {
-            try
-            {
-                // 기존 공유가 있으면 제거
-                RemoveWindowsShare();
 
-                // net share 명령으로 공유 설정
-                string args = $"{_settingsManager.Settings.ShareName}=\"{_settingsManager.Settings.ShareFolder}\" /GRANT:Everyone,FULL";
-
-                // net share 명령 실행
-                using (Process process = new Process())
-                {
-                    process.StartInfo.FileName = "net";
-                    process.StartInfo.Arguments = $"share {args}";
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.CreateNoWindow = true;
-                    process.StartInfo.RedirectStandardOutput = true;
-                    process.StartInfo.RedirectStandardError = true;
-
-                    process.Start();
-                    process.WaitForExit();
-
-                    if (process.ExitCode != 0)
-                    {
-                        string error = process.StandardError.ReadToEnd();
-                        throw new Exception($"공유 설정 실패: {error}");
-                    }
-                }
-
-                Debug.WriteLine($"SMB 공유 설정 완료: \\\\{GetComputerName()}\\{_settingsManager.Settings.ShareName}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Windows 공유 설정 오류: {ex.Message}");
-
-                // 관리자 권한 확인
-                if (ex.Message.Contains("액세스가 거부되었습니다") ||
-                    ex.Message.Contains("Access is denied"))
-                {
-                    MessageBox.Show(
-                        "SMB 공유를 설정하려면 관리자 권한이 필요합니다.\n\n" +
-                        "앱을 관리자 권한으로 실행하세요.",
-                        "권한 오류",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
-                }
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Windows 공유 해제
-        /// </summary>
-        private void RemoveWindowsShare()
-        {
-            try
-            {
-                // net share 명령으로 공유 해제
-                using (Process process = new Process())
-                {
-                    process.StartInfo.FileName = "net";
-                    process.StartInfo.Arguments = $"share {_settingsManager.Settings.ShareName} /DELETE /Y";
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.CreateNoWindow = true;
-
-                    process.Start();
-                    process.WaitForExit();
-                }
-
-                Debug.WriteLine($"SMB 공유 해제 완료: {_settingsManager.Settings.ShareName}");
-            }
-            catch (Exception ex)
-            {
-                // 기존 공유가 없는 경우 오류 무시
-                Debug.WriteLine($"Windows 공유 해제 오류 (무시됨): {ex.Message}");
-            }
-        }
 
         /// <summary>
         /// 파일 생성 이벤트 처리

@@ -100,38 +100,38 @@ namespace VideoCutMarkerEncoder
 
         private void UpdateServiceStatus()
         {
-            // ⭐ 앱 내부 실행 여부 + 외부 공유 설정 여부 모두 체크
             bool isRunning = smbService.IsRunning;
             bool isShareActive = smbService.IsShareActive();
-            bool isActuallyShared = isRunning || isShareActive;
 
-            // 상태 표시
-            if (isActuallyShared)
+            // File monitoring status
+            lblStatus.Text = isRunning ? "File Monitoring: Running" : "File Monitoring: Stopped";
+            lblStatus.ForeColor = isRunning ? Color.Green : Color.Gray;
+
+
+            // Share information display
+            if (isShareActive)
             {
-                lblStatus.Text = "공유됨";
-                lblStatus.ForeColor = Color.Green;
+                txtShareInfo.Text = $"✅ SMB Share Status: Active\r\n" +
+                                   $"SMB Share Address: \\\\{smbService.GetComputerName()}\\{settingsManager.Settings.ShareName}\r\n" +
+                                   $"Share Folder: {settingsManager.Settings.ShareFolder}\r\n" +
+                                   $"Output Folder: {settingsManager.Settings.OutputFolder}";
+                txtShareInfo.ForeColor = Color.Green;
 
-                // 공유 정보 표시
-                txtShareInfo.Text = $"SMB 공유 주소: \\\\{smbService.GetComputerName()}\\{settingsManager.Settings.ShareName}\r\n" +
-                                   $"출력 폴더: {settingsManager.Settings.OutputFolder}";
-
-                // 외부에서 공유된 경우 추가 안내
-                if (!isRunning && isShareActive)
-                {
-                    txtShareInfo.Text += "\r\n\r\n 공유가 설정되어 있습니다.";
-                }
-                btnToggleService.Text = "StopShare";
+                // Hide help button when share is active
+                btnShareHelp.Visible = false;
             }
             else
             {
-                lblStatus.Text = "중지됨";
-                lblStatus.ForeColor = Color.Red;
-                txtShareInfo.Text = "서비스가 중지되었습니다. 'StartShare' 버튼을 눌러 서비스를 시작하세요.";
-                btnToggleService.Text = "StartShare";
-            }
+                txtShareInfo.Text = $"❌ SMB Share Status: Inactive\r\n\r\n" +
+                                   $"SMB share is not configured.\r\n" +
+                                   $"Click the '?' button on the right to see how to set up sharing.\r\n\r\n" +
+                                   $"Folder to share: {settingsManager.Settings.ShareFolder}\r\n" +
+                                   $"Share name: {settingsManager.Settings.ShareName}";
+                txtShareInfo.ForeColor = Color.Red;
 
-            // 버튼 텍스트는 앱 내부 실행 상태 기준으로 설정
-            //btnToggleService.Text = isRunning ? "중지" : "시작";
+                // Show help button when share is inactive
+                btnShareHelp.Visible = true;
+            }
         }
 
         private void btnToggleService_Click(object sender, EventArgs e)
@@ -158,6 +158,52 @@ namespace VideoCutMarkerEncoder
             }
 
             UpdateServiceStatus();
+        }
+
+        private void btnShareHelp_Click(object sender, EventArgs e)
+        {
+            string helpMessage =
+                "📁 How to Set Up SMB Share\n\n" +
+                "1. Open Windows Explorer and navigate to:\n" +
+                $"   {settingsManager.Settings.ShareFolder}\n\n" +
+                "2. Right-click the folder → Select 'Properties'\n\n" +
+                "3. Go to 'Sharing' tab → Click 'Advanced Sharing' button\n\n" +
+                "4. Check 'Share this folder'\n\n" +
+                $"5. Share name: {settingsManager.Settings.ShareName}\n\n" +
+                "6. Click 'Permissions' → Grant 'Full Control' to Everyone\n\n" +
+                "7. Click OK → OK\n\n" +
+                "✅ After setup, the share status will automatically change to 'Active'.\n\n" +
+                "📌 Would you like to copy the folder path to clipboard?";
+
+            DialogResult result = MessageBox.Show(
+                helpMessage,
+                "SMB Share Setup Guide",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information
+            );
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    Clipboard.SetText(settingsManager.Settings.ShareFolder);
+                    MessageBox.Show(
+                        "Folder path copied to clipboard!",
+                        "Copy Complete",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Failed to copy to clipboard: {ex.Message}",
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
         }
 
         private void btnSettings_Click(object sender, EventArgs e)

@@ -31,7 +31,7 @@
             panelHeader = new Panel();
             lblStatus = new Label();
             btnSettings = new Button();
-            btnToggleService = new Button();
+            btnShareHelp = new Button();
             lblStatusTitle = new Label();
             panelInfo = new Panel();
             txtShareInfo = new TextBox();
@@ -43,6 +43,7 @@
             columnStatus = new ColumnHeader();
             columnProgress = new ColumnHeader();
             lblTasks = new Label();
+            
             panelHeader.SuspendLayout();
             panelInfo.SuspendLayout();
             panelTasks.SuspendLayout();
@@ -52,48 +53,13 @@
             // 
             panelHeader.BackColor = Color.FromArgb(240, 240, 240);
             panelHeader.Controls.Add(lblStatus);
+            panelHeader.Controls.Add(btnShareHelp);
             panelHeader.Controls.Add(btnSettings);
-            panelHeader.Controls.Add(btnToggleService);
             panelHeader.Controls.Add(lblStatusTitle);
             panelHeader.Dock = DockStyle.Top;
             panelHeader.Location = new Point(0, 0);
             panelHeader.Name = "panelHeader";
             panelHeader.Size = new Size(684, 60);
-            panelHeader.TabIndex = 0;
-            // 
-            // lblStatus
-            // 
-            lblStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            lblStatus.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblStatus.ForeColor = Color.Red;
-            lblStatus.Location = new Point(388, 20);
-            lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(95, 23);
-            lblStatus.TabIndex = 3;
-            lblStatus.Text = "중지됨";
-            lblStatus.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // btnSettings
-            // 
-            btnSettings.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnSettings.Location = new Point(489, 20);
-            btnSettings.Name = "btnSettings";
-            btnSettings.Size = new Size(75, 23);
-            btnSettings.TabIndex = 2;
-            btnSettings.Text = "설정";
-            btnSettings.UseVisualStyleBackColor = true;
-            btnSettings.Click += btnSettings_Click;
-            // 
-            // btnToggleService
-            // 
-            btnToggleService.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnToggleService.Location = new Point(570, 20);
-            btnToggleService.Name = "btnToggleService";
-            btnToggleService.Size = new Size(75, 23);
-            btnToggleService.TabIndex = 1;
-            btnToggleService.Text = "시작";
-            btnToggleService.UseVisualStyleBackColor = true;
-            btnToggleService.Click += btnToggleService_Click;
             // 
             // lblStatusTitle
             // 
@@ -101,9 +67,39 @@
             lblStatusTitle.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblStatusTitle.Location = new Point(12, 20);
             lblStatusTitle.Name = "lblStatusTitle";
-            lblStatusTitle.Size = new Size(412, 25);
-            lblStatusTitle.TabIndex = 0;
-            lblStatusTitle.Text = "VideoCutMarker - 모바일 앱 연동 서비스 상태:";
+            lblStatusTitle.Text = "VideoCutMarker Encoder";
+            // 
+            // lblStatus
+            // 
+            lblStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            lblStatus.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblStatus.ForeColor = Color.Red;
+            lblStatus.Location = new Point(250, 20);
+            lblStatus.AutoSize = true;
+            lblStatus.Name = "lblStatus";
+            lblStatus.Text = "중지됨";
+            lblStatus.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // btnSettings
+            // 
+            btnSettings.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnSettings.Location = new Point(470, 20);
+            btnSettings.Name = "btnSettings";
+            btnSettings.Size = new Size(75, 23);
+            btnSettings.Text = "Setting";
+            btnSettings.UseVisualStyleBackColor = true;
+            btnSettings.Click += btnSettings_Click;
+            // 
+            // btnShareHelp
+            // 
+            btnShareHelp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnShareHelp.Location = new Point(570, 20);
+            btnShareHelp.Name = "btnShareHelp";
+            btnShareHelp.Size = new Size(75, 23);
+            btnShareHelp.Text = "?";
+            btnShareHelp.UseVisualStyleBackColor = true;
+            btnShareHelp.Click += btnShareHelp_Click;
+            
             // 
             // panelInfo
             // 
@@ -113,7 +109,7 @@
             panelInfo.Location = new Point(0, 60);
             panelInfo.Name = "panelInfo";
             panelInfo.Padding = new Padding(12);
-            panelInfo.Size = new Size(684, 120);
+            panelInfo.Size = new Size(684, 150);
             panelInfo.TabIndex = 1;
             // 
             // txtShareInfo
@@ -202,6 +198,7 @@
             lblTasks.Size = new Size(78, 21);
             lblTasks.TabIndex = 0;
             lblTasks.Text = "처리 작업";
+            
             // 
             // MainForm
             // 
@@ -229,7 +226,7 @@
 
         private System.Windows.Forms.Panel panelHeader;
         private System.Windows.Forms.Label lblStatusTitle;
-        private System.Windows.Forms.Button btnToggleService;
+        private System.Windows.Forms.Button btnShareHelp;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Button btnSettings;
         private System.Windows.Forms.Panel panelInfo;
