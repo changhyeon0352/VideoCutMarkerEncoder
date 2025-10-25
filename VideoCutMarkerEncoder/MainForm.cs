@@ -100,12 +100,11 @@ namespace VideoCutMarkerEncoder
 
         private void UpdateServiceStatus()
         {
-            bool isRunning = smbService.IsRunning;
             bool isShareActive = smbService.IsShareActive();
 
             // File monitoring status
-            lblStatus.Text = isRunning ? "File Monitoring: Running" : "File Monitoring: Stopped";
-            lblStatus.ForeColor = isRunning ? Color.Green : Color.Gray;
+            lblStatus.Text = isShareActive ? "File Monitoring: Running" : "File Monitoring: Stopped";
+            lblStatus.ForeColor = isShareActive ? Color.Green : Color.Gray;
 
 
             // Share information display
@@ -116,9 +115,6 @@ namespace VideoCutMarkerEncoder
                                    $"Share Folder: {settingsManager.Settings.ShareFolder}\r\n" +
                                    $"Output Folder: {settingsManager.Settings.OutputFolder}";
                 txtShareInfo.ForeColor = Color.Green;
-
-                // Hide help button when share is active
-                btnShareHelp.Visible = false;
             }
             else
             {
@@ -129,36 +125,9 @@ namespace VideoCutMarkerEncoder
                                    $"Share name: {settingsManager.Settings.ShareName}";
                 txtShareInfo.ForeColor = Color.Red;
 
-                // Show help button when share is inactive
-                btnShareHelp.Visible = true;
             }
         }
 
-        private void btnToggleService_Click(object sender, EventArgs e)
-        {
-            if (smbService.IsRunning)
-            {
-                smbService.StopService();
-            }
-            else
-            {
-                try
-                {
-                    smbService.StartService();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        $"서비스를 시작하는 중 오류가 발생했습니다:\n\n{ex.Message}",
-                        "오류",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
-                }
-            }
-
-            UpdateServiceStatus();
-        }
 
         private void btnShareHelp_Click(object sender, EventArgs e)
         {
@@ -219,13 +188,6 @@ namespace VideoCutMarkerEncoder
 
                 if (result == DialogResult.OK)
                 {
-                    // 설정이 변경되었으면 서비스 재시작
-                    if (smbService.IsRunning)
-                    {
-                        smbService.StopService();
-                        smbService.StartService();
-                    }
-
                     UpdateServiceStatus();
                 }
             }
@@ -428,11 +390,7 @@ namespace VideoCutMarkerEncoder
 
             base.OnFormClosing(e);
 
-            // 종료 시 서비스 중지
-            if (smbService.IsRunning)
-            {
-                smbService.StopService(false);
-            }
+            
 
             // 트레이 아이콘 제거
             if (trayIcon != null)

@@ -83,7 +83,7 @@
             // btnSettings
             // 
             btnSettings.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnSettings.Location = new Point(470, 20);
+            btnSettings.Location = new Point(600, 20);
             btnSettings.Name = "btnSettings";
             btnSettings.Size = new Size(75, 23);
             btnSettings.Text = "Setting";
@@ -93,10 +93,10 @@
             // btnShareHelp
             // 
             btnShareHelp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnShareHelp.Location = new Point(570, 20);
+            btnShareHelp.Location = new Point(450, 20);
             btnShareHelp.Name = "btnShareHelp";
-            btnShareHelp.Size = new Size(75, 23);
-            btnShareHelp.Text = "?";
+            btnShareHelp.Size = new Size(50, 23);
+            btnShareHelp.Text = "Help";
             btnShareHelp.UseVisualStyleBackColor = true;
             btnShareHelp.Click += btnShareHelp_Click;
             

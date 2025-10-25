@@ -24,12 +24,7 @@ namespace VideoCutMarkerEncoder.Services
         private readonly HashSet<string> _processedFiles = new HashSet<string>();
         private readonly SettingsManager _settingsManager;
         private FileSystemWatcher _watcher;
-        private bool _isRunning;
 
-        /// <summary>
-        /// 서비스 실행 중 여부
-        /// </summary>
-        public bool IsRunning => _isRunning;
 
         /// <summary>
         /// 파일 수신 이벤트
@@ -65,7 +60,7 @@ namespace VideoCutMarkerEncoder.Services
                 {
                     NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
                     Filter = "*.json", // VCM 메타데이터 파일만 감시
-                    EnableRaisingEvents = false
+                    EnableRaisingEvents = true
                 };
                 _watcher.EnableRaisingEvents = true;
                 _watcher.Created += OnFileCreated;
@@ -78,42 +73,6 @@ namespace VideoCutMarkerEncoder.Services
             }
         }
 
-        /// <summary>
-        /// 서비스 시작
-        /// </summary>
-        public void StartService()
-        {
-            try
-            {
-
-                // 공유 폴더 확인
-                if (!Directory.Exists(_settingsManager.Settings.ShareFolder))
-                {
-                    Directory.CreateDirectory(_settingsManager.Settings.ShareFolder);
-                }
-
-                // 와처 재설정 (공유 폴더가 변경되었을 수 있음)
-                if (_watcher.Path != _settingsManager.Settings.ShareFolder)
-                {
-                    _watcher.Dispose();
-                    InitializeWatcher();
-                }
-
-
-
-                // 파일 감시 시작
-                _watcher.EnableRaisingEvents = true;
-
-                _isRunning = true;
-
-                Debug.WriteLine("SMB 서비스가 시작되었습니다.");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"SMB 서비스 시작 오류: {ex.Message}");
-                throw;
-            }
-        }
 
         /// <summary>
         /// 서비스 시작 시 기존 파일들 확인 및 처리 (새로 추가)
@@ -149,26 +108,6 @@ namespace VideoCutMarkerEncoder.Services
             }
         }
 
-        /// <summary>
-        /// 서비스 중지
-        /// </summary>
-        public void StopService(bool isStopShare = true)
-        {
-            try
-            {
-                // 파일 감시 중지
-                _watcher.EnableRaisingEvents = false;
-                
-
-                _isRunning = false;
-
-                Debug.WriteLine("SMB 서비스가 중지되었습니다.");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"SMB 서비스 중지 오류: {ex.Message}");
-            }
-        }
 
         /// <summary>
         /// 컴퓨터 이름 가져오기
