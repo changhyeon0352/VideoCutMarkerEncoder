@@ -38,7 +38,7 @@ namespace VideoCutMarkerEncoder.Models
 
             // 일반 설정 기본값
             ShareName = "VideoCutMarker";
-            MinimizeToTray = true;
+            MinimizeToTray = false;
             NotifyOnComplete = true;
 
             // 인코딩 설정 기본값

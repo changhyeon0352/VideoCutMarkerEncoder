@@ -67,7 +67,7 @@ namespace VideoCutMarkerEncoder.Models
 
                         // 일반 설정
                         ShareName = "VideoCutMarker",
-                        MinimizeToTray = true,
+                        MinimizeToTray = false,
                         NotifyOnComplete = true
                     };
 

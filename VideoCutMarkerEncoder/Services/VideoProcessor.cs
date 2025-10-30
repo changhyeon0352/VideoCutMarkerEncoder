@@ -811,7 +811,19 @@ namespace VideoCutMarkerEncoder.Services
             // 비디오 코덱
             string videoCodec = GetVideoCodec(metadata);
             args.Append($"-c:v {videoCodec} ");
-
+            // ✅ Copy 코덱이면 CQ, FPS 옵션 무시
+            if (videoCodec == "copy")
+            {
+                // 오디오 코덱만 추가
+                string audioCodec1 = GetAudioCodec(metadata);
+                args.Append($"-c:a {audioCodec1} ");
+                return;
+            }
+            // ✅ FPS 제한 옵션 추가
+            if (metadata.EncodingSettings?.LimitFrameRate == true)
+            {
+                args.Append($"-r {metadata.EncodingSettings.TargetFps} ");
+            }
             // 품질 설정
             int cq = metadata.EncodingSettings?.CQ > 0 ?
                 metadata.EncodingSettings.CQ : _settingsManager.Settings.VideoQuality;

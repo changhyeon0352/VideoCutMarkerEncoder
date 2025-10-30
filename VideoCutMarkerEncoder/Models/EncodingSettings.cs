@@ -9,6 +9,8 @@ namespace VideoCutMarkerEncoder.Models
     {
         public VideoCodec Codec { get; set; } = VideoCodec.H265_CPU;
         public int CQ { get; set; } = 28;
+        public bool LimitFrameRate { get; set; } = false; // 프레임 레이트 변경 체크박스
+        public int TargetFps { get; set; } = 60; // 목표 fps (기본 60)
         public AudioCodec AudioCodec { get; set; } = AudioCodec.AAC;
         public string OutputPrefix { get; set; } = "";
         public string OutputSuffix { get; set; } = "";
@@ -25,6 +27,7 @@ namespace VideoCutMarkerEncoder.Models
                 VideoCodec.H265_CPU => "libx265",
                 VideoCodec.H265_NVIDIA => "hevc_nvenc",
                 VideoCodec.H265_AMD => "hevc_amf",
+                VideoCodec.Copy => "copy",
                 _ => "libx265"
             };
         }
@@ -34,7 +37,6 @@ namespace VideoCutMarkerEncoder.Models
             return AudioCodec switch
             {
                 AudioCodec.AAC => "aac",
-                AudioCodec.MP3 => "mp3",
                 AudioCodec.Copy => "copy",
                 _ => "aac"
             };
@@ -45,13 +47,14 @@ namespace VideoCutMarkerEncoder.Models
     public enum VideoCodec
     {
         H264_CPU, H264_NVIDIA, H264_AMD,
-        H265_CPU, H265_NVIDIA, H265_AMD
+        H265_CPU, H265_NVIDIA, H265_AMD,
+        Copy
     }
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum AudioCodec
     {
-        AAC, MP3, Copy
+        AAC, Copy
     }
 
 }

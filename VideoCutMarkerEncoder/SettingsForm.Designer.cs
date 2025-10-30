@@ -147,7 +147,7 @@ namespace VideoCutMarkerEncoder
                 txtShareFolder.Text = Path.Combine(appFolder, "Share");
                 txtOutputFolder.Text = Path.Combine(appFolder, "Output");
                 txtShareName.Text = "VideoCutMarker";
-                chkMinimizeToTray.Checked = true;
+                chkMinimizeToTray.Checked = false;
                 chkNotifyOnComplete.Checked = true;
 
                 // ⭐ 자동 삭제도 기본값으로
