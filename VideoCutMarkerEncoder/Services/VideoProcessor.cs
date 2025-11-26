@@ -515,6 +515,16 @@ namespace VideoCutMarkerEncoder.Services
             var args = new StringBuilder();
             args.Append($"-y -ss {startTime} -i \"{metadata.VideoPath}\" -t {endTime - startTime} ");
 
+            // ✅ Copy 코덱이면 필터 없이 스트림 복사만
+            string videoCodec = GetVideoCodec(metadata);
+            if (videoCodec == "copy")
+            {
+                args.Append("-c copy ");
+                args.Append($"\"{outputPath}\"");
+                Debug.WriteLine($"Copy FFmpeg 명령 (필터 없음): {args}");
+                return args.ToString();
+            }
+
             // 비디오 필터 체인 구성
             var filters = new List<string>();
 
