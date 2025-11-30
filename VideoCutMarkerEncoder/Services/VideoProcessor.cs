@@ -81,6 +81,39 @@ namespace VideoCutMarkerEncoder.Services
 
         private static void FindVideoFilePath(VideoEditMetadata metadata, string metadataFilePath)
         {
+            if (!string.IsNullOrEmpty(metadata.VideoPath))
+            {
+                Debug.WriteLine($"SMB 비디오 감지: {metadata.VideoPath}");
+
+                // SMB 경로를 Windows UNC 경로로 변환
+                // smb://192.168.50.123/Downloads/video.mp4
+                // → \\192.168.50.123\Downloads\video.mp4
+                string normalizedUri = metadata.VideoPath;
+                if (normalizedUri.StartsWith("smb:/") && !normalizedUri.StartsWith("smb://"))
+                {
+                    normalizedUri = normalizedUri.Replace("smb:/", "smb://");
+                    Debug.WriteLine($"URI 정규화: {normalizedUri}");
+                }
+
+                Uri uri = new Uri(normalizedUri);
+                string host = uri.Host; // "192.168.50.123"
+                string path = Uri.UnescapeDataString(uri.AbsolutePath.TrimStart('/')); // "Downloads/video.mp4"
+
+                string windowsPath = $"\\\\{host}\\{path.Replace('/', '\\')}";
+
+                Debug.WriteLine($"Windows UNC 경로: {windowsPath}");
+
+                if (File.Exists(windowsPath))
+                {
+                    metadata.VideoPath = windowsPath;
+                    Debug.WriteLine("✅ SMB 비디오 파일 확인됨");
+                    return;
+                }
+                else
+                {
+                    throw new FileNotFoundException($"SMB 경로에서 비디오를 찾을 수 없습니다: {windowsPath}");
+                }
+            }
             // 이미 유효한 경로가 있고 파일이 존재하면 사용
             if (!string.IsNullOrEmpty(metadata.VideoPath) && File.Exists(metadata.VideoPath))
             {
@@ -343,13 +376,28 @@ namespace VideoCutMarkerEncoder.Services
 
             try
             {
-                if (metadata.OutputMode == OutputMode.Merge)
+                string outputFolder;
+                bool isSmbVideo = metadata.VideoPath.StartsWith("\\\\");
+
+                if (isSmbVideo)
                 {
-                    return await ProcessMergeMode(metadata, task);
+                    // SMB 비디오: 원본과 같은 폴더에 출력
+                    outputFolder = Path.GetDirectoryName(metadata.VideoPath);
+                    Debug.WriteLine($"SMB 비디오 - 출력 폴더: {outputFolder}");
                 }
                 else
                 {
-                    return await ProcessSeparateMode(metadata, task);
+                    // 일반 비디오: Output 폴더에 출력
+                    outputFolder = _settingsManager.Settings.OutputFolder;
+                    Debug.WriteLine($"일반 비디오 - 출력 폴더: {outputFolder}");
+                }
+                if (metadata.OutputMode == OutputMode.Merge)
+                {
+                    return await ProcessMergeMode(metadata, task, outputFolder);
+                }
+                else
+                {
+                    return await ProcessSeparateMode(metadata, task, outputFolder);
                 }
             }
             catch (Exception ex)
@@ -361,7 +409,7 @@ namespace VideoCutMarkerEncoder.Services
         /// <summary>
         /// Separate 모드 처리 (기존 방식 + 회전 추가)
         /// </summary>
-        private async Task<string> ProcessSeparateMode(VideoEditMetadata metadata, ProcessingTask task)
+        private async Task<string> ProcessSeparateMode(VideoEditMetadata metadata, ProcessingTask task,string outputFolder)
         {
             var outputFiles = new List<string>();
             var groupSegments = metadata.Segments.GroupBy(s => s.GroupId).ToList();
@@ -392,7 +440,7 @@ namespace VideoCutMarkerEncoder.Services
                     cropY = Math.Max(0, cropY);
 
                     // 세그먼트 파일 경로
-                    string segmentFilePath = Path.Combine(_settingsManager.Settings.OutputFolder,
+                    string segmentFilePath = Path.Combine(outputFolder,
                         $"segment_{task.TaskId}_group{groupId}_{i}.mp4");
                     segmentFiles.Add(segmentFilePath);
 
@@ -421,7 +469,7 @@ namespace VideoCutMarkerEncoder.Services
                 string suffix = metadata.EncodingSettings?.OutputSuffix ?? "";
                 string finalsuffix = $"{suffix}{groupSuffix}";
                 string outputFileName = GenerateUniqueFileName(prefix, baseName, finalsuffix, extension);
-                string outputPath = Path.Combine(_settingsManager.Settings.OutputFolder, outputFileName);
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // 그룹 내 세그먼트 병합 (필요시)
                 await MergeSegmentsIfNeeded(segmentFiles, outputPath, task, groupId);
@@ -436,7 +484,7 @@ namespace VideoCutMarkerEncoder.Services
         /// <summary>
         /// Merge 모드 처리 - 시간순 정렬 + 기준 해상도 맞춤
         /// </summary>
-        private async Task<string> ProcessMergeMode(VideoEditMetadata metadata, ProcessingTask task)
+        private async Task<string> ProcessMergeMode(VideoEditMetadata metadata, ProcessingTask task, string outputFolder)
         {
             // 기준 해상도 확인
             if (metadata.ReferenceResolution == null)
@@ -457,7 +505,7 @@ namespace VideoCutMarkerEncoder.Services
                     continue;
 
                 // 임시 세그먼트 파일 경로
-                string tempFilePath = Path.Combine(_settingsManager.Settings.OutputFolder,
+                string tempFilePath = Path.Combine(outputFolder,
                     $"temp_merge_{task.TaskId}_{i}.mp4");
                 tempSegmentFiles.Add(tempFilePath);
 
@@ -482,7 +530,7 @@ namespace VideoCutMarkerEncoder.Services
             }
 
             // 최종 병합
-            string finalOutputPath = await MergeFinalVideo(metadata, tempSegmentFiles, task);
+            string finalOutputPath = await MergeFinalVideo(metadata, tempSegmentFiles, task, outputFolder);
 
             // 임시 파일 정리
             foreach (string tempFile in tempSegmentFiles)
@@ -772,7 +820,7 @@ namespace VideoCutMarkerEncoder.Services
         /// 최종 비디오 병합 (Merge 모드)
         /// </summary>
         private async Task<string> MergeFinalVideo(VideoEditMetadata metadata,
-            List<string> tempFiles, ProcessingTask task)
+            List<string> tempFiles, ProcessingTask task,string outputFolder)
         {
             // 최종 출력 파일 경로
             string baseName = Path.GetFileNameWithoutExtension(metadata.VideoFileName);
@@ -780,7 +828,7 @@ namespace VideoCutMarkerEncoder.Services
             string suffix = metadata.EncodingSettings?.OutputSuffix ?? "";
             string finalSuffix = $"{suffix}_merged";
             string finalFileName = GenerateUniqueFileName(prefix, baseName, finalSuffix, ".mp4");
-            string finalPath = Path.Combine(_settingsManager.Settings.OutputFolder, finalFileName);
+            string finalPath = Path.Combine(outputFolder, finalFileName);
 
             if (tempFiles.Count == 1)
             {
@@ -790,7 +838,7 @@ namespace VideoCutMarkerEncoder.Services
             else
             {
                 // 여러 파일 병합
-                string listFilePath = Path.Combine(_settingsManager.Settings.OutputFolder,
+                string listFilePath = Path.Combine(outputFolder,
                     $"final_merge_{task.TaskId}.txt");
 
                 using (StreamWriter writer = new StreamWriter(listFilePath))
@@ -961,7 +1009,14 @@ namespace VideoCutMarkerEncoder.Services
 
                 // 출력도 완료될 때까지 대기
                 await Task.WhenAll(outputTask, errorTask);
+                var errorOutput = await errorTask;
 
+                // ✅ 에러 출력 로깅 추가
+                if (process.ExitCode != 0)
+                {
+                    Debug.WriteLine($"FFmpeg 실패 (Exit Code: {process.ExitCode})");
+                    Debug.WriteLine($"Error: {errorOutput}");
+                }
                 return process.ExitCode == 0;
             }
         }
